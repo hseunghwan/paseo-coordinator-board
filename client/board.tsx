@@ -25,7 +25,7 @@ import { SessionLinks } from "./session-links";
 import { useRemoteRunning, RemoteRunning } from "./remote-running";
 import { BoardHosts } from "./hosts";
 import { OperationsPanel } from "./operations";
-import { Button, SettingsDisclosure, fontSize, space, type Theme } from "./controls";
+import { Button, Disclosure, fontSize, space, type Theme } from "./controls";
 import { Project } from "./project-kanban";
 import { SessionProgress } from "./session-progress";
 import { BoardLanguageSetting, useBoardLanguage } from "./language";
@@ -377,9 +377,9 @@ export function BoardView({ snapshot, readiness, theme, layout, hostLabel, hostI
           <Text accessibilityRole="header" style={{ color: c.foreground, fontSize: fontSize.base, fontWeight: "500" }}>{t("다이제스트에서 관리할 프로젝트 선택", "Select projects for your digest")}</Text>
           {projectPicker}
         </View>
-        : <SettingsDisclosure theme={theme} title={t("보드에서 관리할 프로젝트 선택", "Choose projects to manage")} expanded={manage} onPress={() => setManage(!manage)}>
+        : <Disclosure theme={theme} title={t("보드에서 관리할 프로젝트 선택", "Choose projects to manage")} expanded={manage} onPress={() => setManage(!manage)}>
           {projectPicker}
-        </SettingsDisclosure>)}
+        </Disclosure>)}
       {settings && snapshot && configured && <SessionLinks projects={snapshot.projects} theme={theme} onChange={onRefresh} />}
       {settings && pullRequests && !!configured && <PullRequestSettings view={pullRequests} names={names} theme={theme} refresh={onRefresh} />}
       {settings && hostId && <>

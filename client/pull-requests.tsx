@@ -3,7 +3,7 @@ import { openExternalUrl, useRpc } from "@getpaseo/plugin/client";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Platform, Text, TextInput, View } from "react-native";
 import { confirmPullRequestMerge, previewPullRequestMerge, pullUrl, readPullLifecycle, setProjectRepository, type MergeMethod, type MergePreview, type MergeReason, type MergeResult, type PullRequestView } from "../shared/prs";
-import { Button, ProjectText, SettingsDisclosure, SessionChip, type Theme } from "./controls";
+import { Button, ProjectText, Disclosure, SessionChip, type Theme } from "./controls";
 import { mergeNotificationLabel } from "./merge-notification";
 import { useBoardLanguage, type Translate } from "./language";
 
@@ -188,9 +188,9 @@ export function PullRequestCard({ pr, projectId, theme, decision = false, showDi
 export function PullRequestSettings({view, names, theme, refresh}: {view: PullRequestView; names: Map<string,string>; theme: Theme; refresh: () => void}) {
   const {t} = useBoardLanguage();
   const [expanded, setExpanded] = useState(false);
-  return <SettingsDisclosure theme={theme} title={t("프로젝트별 GitHub 저장소", "GitHub repositories by project")} expanded={expanded} onPress={() => setExpanded(!expanded)}>
+  return <Disclosure theme={theme} title={t("프로젝트별 GitHub 저장소", "GitHub repositories by project")} expanded={expanded} onPress={() => setExpanded(!expanded)}>
     {view.projects.map(project => <RepositorySetting key={JSON.stringify([project.projectId, project.mode, project.repo])} project={project} title={names.get(project.projectId) ?? project.projectId} theme={theme} refresh={refresh}/>)}
-  </SettingsDisclosure>;
+  </Disclosure>;
 }
 
 function RepositorySetting({project, title, theme, refresh}: {project: PullRequestView["projects"][number]; title:string; theme:Theme; refresh:()=>void}) {

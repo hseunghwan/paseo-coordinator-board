@@ -5,7 +5,7 @@ import { Image, Text, View } from "react-native";
 import { pullUrl } from "../shared/prs";
 import { mergeNotificationLabel } from "./merge-notification";
 import { readReplyPhoto, type ReplyEntry } from "../shared/reply-history";
-import { Button, type Theme } from "./controls";
+import { Button, Disclosure, space, type Theme } from "./controls";
 import type { HistoryLinks, HistorySession } from "./history-sessions";
 import { HistoryMarkdown } from "./history-markdown";
 import { useBoardLanguage } from "./language";
@@ -101,16 +101,17 @@ export function ReplyCard({entry, theme, links, open, openRemote}:Props) {
           <HistoryMarkdown theme={theme} source={entry.response} preview={long && !full} />
         </View>
       : <Text style={{color:colors.foregroundMuted,fontSize:12}}>{t("후속 응답 미확인","No verified follow-up yet")}</Text>)}
-    {long && <Button theme={theme} expanded={full} label={full ? t("접기","Show less") : t("내용 펼치기","Read more")} onPress={()=>setFull(value=>!value)} />}
-    {origin && <View style={{alignItems:"flex-start",gap:3}}>
-      <Button theme={theme} expanded={showOrigin} label={t("답변 출처", "Reply source")} onPress={() => setShowOrigin(value => !value)} />
-      {showOrigin && <Text selectable style={{color:colors.foregroundMuted,fontSize:12}}>{[
+    {long && <View style={{alignItems:"flex-start"}}>
+      <Button theme={theme} variant="ghost" size="sm" expanded={full} label={full ? t("접기","Show less") : t("내용 펼치기","Read more")} onPress={()=>setFull(value=>!value)} />
+    </View>}
+    {origin && <Disclosure theme={theme} expanded={showOrigin} title={t("답변 출처", "Reply source")} onPress={() => setShowOrigin(value => !value)}>
+      <Text selectable style={{color:colors.foregroundMuted,fontSize:12}}>{[
         t("원본 카드", "Source card") + " · " + origin.cardId,
         origin.questions.length ? t("질문", "Question") + " · " + origin.questions.map(q => q.id).join(", ") : "",
         origin.sessionId && t("원래 세션", "Source session") + " · " + [origin.sessionHost,origin.sessionId].filter(Boolean).join(" · "),
         t("기록 버전", "Revision") + " · " + origin.revision,
-      ].filter(Boolean).join("\n")}</Text>}
-    </View>}
+      ].filter(Boolean).join("\n")}</Text>
+    </Disclosure>}
   </View>;
 }
 
@@ -118,10 +119,11 @@ export function ReplyHistory({entries,theme,links,open,openRemote,expanded,onTog
   const {t} = useBoardLanguage();
   const [limit,setLimit] = useState(1);
   if (!entries.length) return null;
-  return <View style={{gap:6}}>
-    <Button theme={theme} expanded={expanded} onPress={onToggle} accessibilityLabel={t("최근 결정 기록","Recent decision activity")}
-      label={t(`최근 결정 기록 · ${entries.length}건`,`Recent decision activity · ${entries.length}`) + (expanded ? " ▴" : " ▾")} />
+  return <Disclosure theme={theme} expanded={expanded} onPress={onToggle}
+    title={t(`최근 결정 기록 · ${entries.length}건`,`Recent decision activity · ${entries.length}`)}>
     {expanded && entries.slice(0, limit).map(entry=><ReplyCard key={entry.key} entry={entry} links={links} open={open} openRemote={openRemote} theme={theme} />)}
-    {expanded && entries.length > limit && <Button theme={theme} label={t("이전 기록 더 보기","Show earlier activity")} onPress={()=>setLimit(n=>n+10)} />}
-  </View>;
+    {expanded && entries.length > limit && <View style={{alignItems:"flex-start",paddingTop:space[1]}}>
+      <Button theme={theme} variant="ghost" size="sm" label={t("이전 기록 더 보기","Show earlier activity")} onPress={()=>setLimit(n=>n+10)} />
+    </View>}
+  </Disclosure>;
 }

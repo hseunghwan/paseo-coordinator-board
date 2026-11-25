@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import type { z } from "zod";
 import { linkSession, listSessionLinks } from "../shared/session-links";
-import { Button, SettingsDisclosure, type Theme } from "./controls";
+import { Button, Disclosure, type Theme } from "./controls";
 import { useBoardLanguage } from "./language";
 import type { Snapshot } from "./model";
 
@@ -126,7 +126,7 @@ function LinkPicker({ projects, theme, onChange }: Props) {
 export function SessionLinks(props: Props) {
   const { t } = useBoardLanguage();
   const [opened, setOpened] = useState(false);
-  return <SettingsDisclosure theme={props.theme} title={t("다른 프로젝트의 세션 하나 연결", "Link a session from another project")} expanded={opened} onPress={() => setOpened(!opened)}>
+  return <Disclosure theme={props.theme} title={t("다른 프로젝트의 세션 하나 연결", "Link a session from another project")} expanded={opened} onPress={() => setOpened(!opened)}>
     <LinkPicker {...props} />
-  </SettingsDisclosure>;
+  </Disclosure>;
 }

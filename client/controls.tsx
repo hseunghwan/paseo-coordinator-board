@@ -112,7 +112,7 @@ export function ProjectText({ theme, projects, projectId, style, ...props }: Tex
   </View>;
 }
 
-export function SettingsDisclosure({ title, expanded, onPress, theme, children }: {
+export function Disclosure({ title, expanded, onPress, theme, children }: {
   title: string; expanded: boolean; onPress: () => void; theme: Theme; children: ReactNode;
 }) {
   const c = theme.colors;

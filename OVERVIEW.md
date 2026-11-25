@@ -44,6 +44,8 @@ After sending an answer, choose **Open receiving session** on the collapsed card
 
 ## Work with a coordinator
 
+Expand **Recent decision activity** to see the indented list of records. Use **Read more** for long answers and **Reply source** for the original card and question.
+
 Use **Expand editor** next to **Request for the coordinator** to review a longer draft. Collapsing and reopening the editor preserves your text and photos.
 
 Click **Start with recommended settings** to create the coordinator, or select **Choose an existing coordinator session** in Settings. Before creating or replacing a coordinator, the board shows the model and tool permission mode. It prefers Auto mode for Claude Code and Auto-review for Codex when supported. OpenCode with Build mode and Copilot with Agent mode can serve as alternatives when their coordinator mode is available on the host. For other providers, you can designate an existing session with Paseo MCP.
