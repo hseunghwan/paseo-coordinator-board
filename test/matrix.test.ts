@@ -77,18 +77,27 @@ test("keeps a matched session that no longer waits on me", () => {
   expect(lanes(items)).toEqual([["decision:r", "human"], ["session:s", "running"]]);
 });
 
-test("places every lane in a fixed column, with idle and unknown after live work", () => {
-  expect(matrixColumns).toEqual(["human", "running", "review", "done"]);
-  expect(matrixColumn("idle")).toBe("running");
-  expect(matrixColumn("unknown")).toBe("running");
+test("places every lane in a fixed column, keeping idle sessions out of live work", () => {
+  expect(matrixColumns).toEqual(["human", "running", "review", "idle", "done"]);
+  expect(matrixColumn("idle")).toBe("idle");
+  expect(matrixColumn("unknown")).toBe("idle");
   const cells = matrixCells(classifyProject({
     records: [], pulls: [],
     cards: [card("idle", "idle"), card("run", "running"), card("lost", "unknown"), card("ask", "human"), card("check", "review"), card("ok", "done")],
   }));
-  expect(cells.running.map(item => item.key)).toEqual(["session:run", "session:idle", "session:lost"]);
+  expect(cells.running.map(item => item.key)).toEqual(["session:run"]);
+  expect(cells.idle.map(item => item.key)).toEqual(["session:idle", "session:lost"]);
   expect(cells.human.map(item => item.key)).toEqual(["session:ask"]);
   expect(cells.review.map(item => item.key)).toEqual(["session:check"]);
   expect(cells.done.map(item => item.key)).toEqual(["session:ok"]);
+});
+
+test("a session whose finished result was seen moves from review to idle, not to running", () => {
+  const before = matrixCells(classifyProject({ records: [], pulls: [], cards: [card("s", "review")] }));
+  const after = matrixCells(classifyProject({ records: [], pulls: [], cards: [card("s", "idle")] }));
+  expect(before.review.map(item => item.key)).toEqual(["session:s"]);
+  expect(after.running).toEqual([]);
+  expect(after.idle.map(item => item.key)).toEqual(["session:s"]);
 });
 
 test("marks waiting, mergeable, failed, running and idle items with distinct states", () => {
@@ -153,8 +162,8 @@ test("builds one row per project and a host-wide row last with only its records"
 
 test("summarizes a collapsed row by its non-empty columns in both languages", () => {
   const cells = matrixCells(classifyProject({ records: [record("r1"), record("r2")], cards: [card("a", "running"), card("b", "idle"), card("c", "running")], pulls: [pull(1, { reason: "conflict" })] }));
-  expect(matrixSummary(cells, korean)).toBe("결정 2 · 진행 3 · 확인 1");
-  expect(matrixSummary(cells, english)).toBe("Decide 2 · Running 3 · Review 1");
+  expect(matrixSummary(cells, korean)).toBe("결정 2 · 진행 2 · 확인 1 · 대기 1");
+  expect(matrixSummary(cells, english)).toBe("Decide 2 · Running 2 · Review 1 · Idle 1");
   expect(matrixSummary(matrixCells([]), korean)).toBe("항목 없음");
   for (const column of matrixColumns) expect(matrixColumnLabel(column, korean)).not.toBe(matrixColumnLabel(column, english));
 });

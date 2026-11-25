@@ -27,7 +27,7 @@ Open the board from the sidebar and select the projects you want in your digest.
 
 - **Inbox** (default): pick a decision from the list and read or answer it in the detail pane. The list groups decisions into Act now, Waiting on you, Ready to merge and Later. Tabs above it open **Progress** and **History**. On a narrow screen, selecting a row opens its detail.
 - **Focus**: shows the most urgent decision on its own. Finishing it moves to the next one, and **Later** sends it to the end of the queue. On desktop and web, press J (next), K (previous) or S (later). The strip at the bottom counts running sessions per project.
-- **Matrix**: ranks decisions in a strip and shows each project's decisions, running work, items awaiting review and finished work in one table row. Select a cell to open its cards below that row.
+- **Matrix**: ranks decisions in a strip and shows each project's decisions, running work, items awaiting review, idle sessions and finished work in one table row. A session with an unseen result moves to Idle after you open it. Select a cell to open its cards below that row.
 - **Classic**: stacks decisions, history and session progress on one page as before.
 
 In every view, a reply draft stays in place when you select another decision. Decisions waiting for a permission are approved in their session.

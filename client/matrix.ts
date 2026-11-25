@@ -38,18 +38,20 @@ export function classifyProject({ records, cards, pulls }: ProjectSources): Lane
   return items;
 }
 
-export type MatrixColumn = "human" | "running" | "review" | "done";
-export const matrixColumns: readonly MatrixColumn[] = ["human", "running", "review", "done"];
+export type MatrixColumn = "human" | "running" | "review" | "idle" | "done";
+// The kanban's lane order. A session whose result was seen is waiting for its next request, not working,
+// so it gets its own column instead of reading as live work.
+export const matrixColumns: readonly MatrixColumn[] = ["human", "running", "review", "idle", "done"];
 
-// Idle and unknown sessions ask nothing of the person, so they sit under "running" as muted rows.
 export function matrixColumn(lane: Lane): MatrixColumn {
-  return lane === "human" || lane === "review" || lane === "done" ? lane : "running";
+  return lane === "unknown" ? "idle" : lane;
 }
 
 export function matrixColumnLabel(column: MatrixColumn, t: Translate) {
   if (column === "human") return t("내 결정", "My decisions");
   if (column === "running") return t("진행 중", "In progress");
   if (column === "review") return t("확인 대기", "Awaiting review");
+  if (column === "idle") return t("대기 중", "Idle");
   return t("완료", "Done");
 }
 
@@ -57,16 +59,15 @@ function matrixColumnShort(column: MatrixColumn, t: Translate) {
   if (column === "human") return t("결정", "Decide");
   if (column === "running") return t("진행", "Running");
   if (column === "review") return t("확인", "Review");
+  if (column === "idle") return t("대기", "Idle");
   return t("완료", "Done");
 }
 
 export type MatrixCells = Record<MatrixColumn, LaneItem[]>;
 
-// Within "running", live work comes before idle and unknown sessions; otherwise the shared order holds.
 export function matrixCells(items: readonly LaneItem[]): MatrixCells {
-  const cells: MatrixCells = { human: [], running: [], review: [], done: [] };
-  for (const item of items) if (item.lane !== "idle" && item.lane !== "unknown") cells[matrixColumn(item.lane)].push(item);
-  for (const item of items) if (item.lane === "idle" || item.lane === "unknown") cells.running.push(item);
+  const cells: MatrixCells = { human: [], running: [], review: [], idle: [], done: [] };
+  for (const item of items) cells[matrixColumn(item.lane)].push(item);
   return cells;
 }
 
@@ -76,7 +77,8 @@ export type MatrixMark = Tone | "idle" | "running";
 export function matrixMark(item: LaneItem): MatrixMark {
   const column = matrixColumn(item.lane);
   if (column === "human") return item.kind === "pull" ? "success" : "warning";
-  if (column === "running") return item.lane === "running" ? "running" : "idle";
+  if (column === "running") return "running";
+  if (column === "idle") return "idle";
   if (column === "review") return item.kind === "pull" && item.pr.reason !== "unknown" ? "danger" : "warning";
   return "success";
 }

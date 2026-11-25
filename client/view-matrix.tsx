@@ -171,7 +171,7 @@ const hostColumn = 96;
 
 function HeaderMark({ column, theme }: { column: MatrixColumn; theme: Theme }) {
   if (column === "running") return <RunningMark theme={theme} />;
-  return <StatusDot theme={theme} tone={column === "human" ? "warning" : column === "done" ? "success" : "muted"} />;
+  return <StatusDot theme={theme} tone={column === "human" ? "warning" : column === "done" ? "success" : column === "idle" ? "idle" : "muted"} />;
 }
 
 function WideMatrix({ rows, theme, projects, cell, mounted, onCell, wide }: {
