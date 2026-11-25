@@ -6,22 +6,19 @@ Paseo에서 여러 프로젝트를 운영할 때, 내가 결정할 일과 각 �
 
 ## 대시보드 미리보기
 
-예시 데이터로 본 **기존** 보기입니다. 위에서 코디네이터에 작업을 요청하고, 아래에서 결정과 프로젝트별 진행 상태를 확인합니다.
+대시보드 보기 세 가지의 초기 설계 시안입니다.
 
-![코디네이터 요청, 내 결정, 프로젝트별 칸반이 보이는 대시보드](assets/preview.png)
+### 1. 결정 인박스
 
-<details>
-<summary>결정 카드와 진행 중인 세션 예시</summary>
+![왼쪽에 결정 목록, 오른쪽에 선택한 결정의 상세와 답장 입력창이 있는 인박스 시안](docs/pr-assets/dashboard-design-1.png)
 
-**내 결정**에서 질문과 문답을 읽고 담당 세션에 답할 수 있습니다.
+### 2. 포커스 큐
 
-![받는 세션과 문답이 표시된 결정 카드](docs/pr-assets/decision-reply-cards/desktop-ko.png)
+![결정 한 건을 화면 가운데에 크게 보여 주는 포커스 큐 시안](docs/pr-assets/dashboard-design-2.png)
 
-**진행 중 모아보기**에서 여러 프로젝트의 실행 중인 세션을 확인할 수 있습니다.
+### 3. 프로젝트 매트릭스
 
-![프로젝트별 작업을 모은 진행 중 세션 목록](docs/pr-assets/running-sessions/board.png)
-
-</details>
+![위에 긴급한 결정, 아래에 프로젝트별 세션 상태와 펼친 카드가 있는 매트릭스 시안](docs/pr-assets/dashboard-design-3.png)
 
 ## 설치하고 첫 카드 보기
 
