@@ -134,7 +134,7 @@ export default function contribute(server: PluginServerContext) {
     const scope = prefs.read();
     const choices = new Map(await Promise.all(catalog.projects.map(async p => {
       const id = p.projectId;
-      const icon = await readProjectIcon(home, id, p.projectCustomIconRevision);
+      const icon = await readProjectIcon(home, id, p.projectCustomIconRevision, p.projectRootPath);
       return [id, { id, title: p.projectCustomName || p.projectDisplayName, path: p.projectRootPath, selected: scope.projects.includes(id), icon }] as const;
     })));
     for (const row of rows) {
