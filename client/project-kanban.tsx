@@ -99,7 +99,7 @@ function Column({lane,entries,theme}: {lane:ColumnKind;entries:Entry[];theme:The
   return <View style={{padding:8,borderRadius:8,backgroundColor:c.surface1,borderColor:c.border,borderWidth:1,gap:7}}>
     <View style={{flexDirection:"row",alignItems:"center",gap:6}}>
       <View style={{width:7,height:7,borderRadius:4,backgroundColor:accent(lane,theme)}} />
-      <Text accessibilityRole="header" style={{color:c.foreground,flex:1,fontWeight:"600"}}>{lane === "history" ? t("결정 후속","Decision follow-up") : laneLabel(lane,t)}</Text>
+      <Text accessibilityRole="header" style={{color:c.foreground,flex:1,fontWeight:"500"}}>{lane === "history" ? t("결정 후속","Decision follow-up") : laneLabel(lane,t)}</Text>
       <Text style={{color:c.foregroundMuted}}>{entries.length}</Text>
     </View>
     {entries.slice(0,limit).map(entry=><View key={entry.key}>{entry.content}</View>)}

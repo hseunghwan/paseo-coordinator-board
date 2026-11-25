@@ -47,7 +47,7 @@ export function BoardLanguageSetting({ theme }: { theme: Theme }) {
     }
   };
   return <View style={{ gap: 8 }}>
-    <Text accessibilityRole="header" style={{ color: theme.colors.foreground, fontSize: 17, fontWeight: "600" }}>{t("보드 언어", "Board language")}</Text>
+    <Text accessibilityRole="header" style={{ color: theme.colors.foregroundMuted, fontSize: 12, fontWeight: "500" }}>{t("보드 언어", "Board language")}</Text>
     <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
       {(["ko", "en"] as const).map(id => <Button theme={theme} key={id} label={id === "ko" ? "한국어" : "English"} selected={language === id}
         disabled={state.status !== "ready" || state.saving} onPress={() => void save(id)} />)}
