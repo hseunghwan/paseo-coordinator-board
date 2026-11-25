@@ -55,7 +55,7 @@ export function SessionProgress({ cards, peers, peersLoading, hostLabel, project
 
   return <View style={{ gap: 12 }}>
     <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-      <Text accessibilityRole="header" style={{ fontSize: 19, fontWeight: "700", color: c.foreground }}>{t("세션 진행", "Session progress")}</Text>
+      <Text accessibilityRole="header" style={{ fontSize: 14, fontWeight: "500", color: c.foreground }}>{t("세션 진행", "Session progress")}</Text>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 5 }}>
         <Button theme={theme} label={t("프로젝트별", "By project")} selected={current === "projects"} disabled={saved.saving} onPress={() => void select("projects")} />
         <Button theme={theme} label={t(`진행 중 모아보기 · ${count}`, `All running · ${count}`)} selected={current === "running"} disabled={saved.saving} onPress={() => void select("running")} />

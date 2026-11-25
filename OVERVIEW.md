@@ -23,11 +23,20 @@ For a registry installation, preview a new reviewed release with `paseo plugin u
 
 Open the board from the sidebar and select the projects you want in your digest. To manage just one session from another project, open **Settings → Link a session from another project**. Search for the session, check its ID and source workspace, select a managed destination, then click **Link to this project**. The card appears once under its destination. The session keeps its original ID, workspace, files and conversation. **Unlink from project** removes the link. The card returns to its source project if that project is also managed.
 
+**Board view.** Choose a layout with **Inbox · Focus · Matrix · Classic** in the header or in **Settings → Board view**. Your device remembers the choice.
+
+- **Inbox** (default): pick a decision from the list and read or answer it in the detail pane. The list groups decisions into Act now, Waiting on you, Ready to merge and Later. Tabs above it open **Progress** and **History**. On a narrow screen, selecting a row opens its detail.
+- **Focus**: shows the most urgent decision on its own. Finishing it moves to the next one, and **Later** sends it to the end of the queue. On desktop and web, press J (next), K (previous) or S (later). The strip at the bottom counts running sessions per project.
+- **Matrix**: ranks decisions in a strip and shows each project's decisions, running work, items awaiting review, idle sessions and finished work in one table row. A session with an unseen result moves to Idle after you open it. Select a cell to open its cards below that row.
+- **Classic**: stacks decisions, history and session progress on one page as before.
+
+In every view, a reply draft stays in place when you select another decision. Decisions waiting for a permission are approved in their session.
+
 In **Session progress**, choose **All running** to see running sessions across the selected projects and visible hosts, ordered by recent activity. Each row shows its project and host and opens the corresponding session. Choose **By project** for the kanban layout. Your device remembers the last view.
 
 In the desktop app and on the web, press **⌘+Enter** on Mac or **Ctrl+Enter** on Windows and Linux to send from the current request, reply or question field. **Enter** inserts a line break. Hover over the send button or focus it with Tab to see the shortcut for your device.
 
-**My decisions** shows overdue and urgent items first, followed by work waiting for a response or permission. Other items are ordered by deadline. Within a priority, the oldest known wait comes first. A card stays in place while you compose a reply or review a merge. Questions and explanations preserve line breaks and render Markdown lists, links, and inline code.
+**My decisions** shows overdue and urgent items first, followed by work waiting for a response or permission. Other items are ordered by deadline. Within a priority, the oldest known wait comes first. The Classic view shows five cards at first. A card stays in place while you compose a reply or review a merge. Questions and explanations preserve line breaks and render Markdown lists, links, and inline code.
 
 After sending an answer, choose **Open receiving session** on the collapsed card to check the conversation. Expand **Recent decision activity** below **My decisions** for the exact message, time and recipient. When available, the history also links to the session that asked the question. An answer saved only on the board can link to its original session without implying delivery. The project’s **Decision follow-up** column keeps the same record. Device-wide actions appear under **Host-wide**. A verified follow-up appears on the card, and the recipient chip opens the conversation.
 

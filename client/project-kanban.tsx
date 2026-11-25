@@ -12,8 +12,9 @@ import { TrackedSessionChips, type TrackedSessionLinks } from "./tracked-session
 import { plainDecisionTitle } from "./decision-summary";
 import { HistoryMarkdown } from "./history-markdown";
 import { ReplyCard } from "./reply-history";
+import { classifyProject } from "./matrix";
 type ColumnKind = Lane | "history";
-type Actions = { sessionHostLabel?: string; onOpen?: (id:string) => void; onEdit:(id:string) => void };
+export type CardActions = { sessionHostLabel?: string; onOpen?: (id:string) => void; onEdit:(id:string) => void };
 
 function accent(lane: ColumnKind, theme: Theme) {
   const c = theme.colors;
@@ -23,7 +24,7 @@ function accent(lane: ColumnKind, theme: Theme) {
   return c.foregroundMuted;
 }
 
-function CardView({ card, theme, onOpen, onEdit, sessionHostLabel }: { card: Card; theme: Theme } & Actions) {
+export function CardView({ card, theme, onOpen, onEdit, sessionHostLabel }: { card: Card; theme: Theme } & CardActions) {
   const [expanded, setExpanded] = useState(false);
   const { t } = useBoardLanguage();
   const { session, note } = card;
@@ -99,7 +100,7 @@ function Column({lane,entries,theme}: {lane:ColumnKind;entries:Entry[];theme:The
   return <View style={{padding:8,borderRadius:8,backgroundColor:c.surface1,borderColor:c.border,borderWidth:1,gap:7}}>
     <View style={{flexDirection:"row",alignItems:"center",gap:6}}>
       <View style={{width:7,height:7,borderRadius:4,backgroundColor:accent(lane,theme)}} />
-      <Text accessibilityRole="header" style={{color:c.foreground,flex:1,fontWeight:"600"}}>{lane === "history" ? t("결정 후속","Decision follow-up") : laneLabel(lane,t)}</Text>
+      <Text accessibilityRole="header" style={{color:c.foreground,flex:1,fontWeight:"500"}}>{lane === "history" ? t("결정 후속","Decision follow-up") : laneLabel(lane,t)}</Text>
       <Text style={{color:c.foregroundMuted}}>{entries.length}</Text>
     </View>
     {entries.slice(0,limit).map(entry=><View key={entry.key}>{entry.content}</View>)}
@@ -107,7 +108,7 @@ function Column({lane,entries,theme}: {lane:ColumnKind;entries:Entry[];theme:The
   </View>;
 }
 
-type Props = Actions & {projectId:string; title:string; history?:ReplyEntry[]; historyLinks:HistoryLinks; openRemote?:(host:string,id:string)=>void; decisions:number; cards:Card[]; records:TrackedDecision[]; requests:PullRequestItem[];
+type Props = CardActions & {projectId:string; title:string; history?:ReplyEntry[]; historyLinks:HistoryLinks; openRemote?:(host:string,id:string)=>void; decisions:number; cards:Card[]; records:TrackedDecision[]; requests:PullRequestItem[];
   renderRecord:(item:TrackedDecision)=>ReactNode; theme:Theme; compact:boolean; recordLinks:(item:TrackedDecision)=>TrackedSessionLinks; renderPull:(pr:PullRequestItem,projectId:string)=>ReactNode};
 const order:ColumnKind[] = ["running","review","human","history","idle","done","unknown"];
 
@@ -115,20 +116,11 @@ export function Project({projectId,title,decisions,cards,records,history=[],hist
   const {t} = useBoardLanguage();
   const [width,setWidth] = useState(0);
   const groups:Record<ColumnKind,Entry[]> = {history: history.map(entry=>({key:entry.key,content:<ReplyCard links={historyLinks} openRemote={openRemote} entry={entry} theme={theme} open={actions.onOpen} />})),running:[],review:[],human:[],idle:[],done:[],unknown:[]};
-  for(const item of records) {
-    const since = Date.parse(item.since ?? "");
-    const answered = item.replyHistory.some(reply => Date.parse(reply.at ?? "") >= since);
-    const lane = answered && !item.matchedSessionId ? "review" : "human";
-    groups[lane].push({key:"decision:"+item.key,content:<RecordPreview item={item} theme={theme} render={renderRecord} links={recordLinks(item)} />});
-  }
-  for(const card of cards) {
-    if(card.lane==="human" && records.some(item=>item.matchedSessionId===card.session.id)) continue;
-    groups[card.lane].push({key:"session:"+card.session.id,content:<CardView card={card} theme={theme} {...actions} />});
-  }
-  for(const pr of requests) {
-    if(records.some(item=>item.matchedPull?.repo===pr.repo && item.matchedPull.number===pr.number)) continue;
-    const lane = pr.lane==="review" ? "human" : ["conflict","checks-failed","changes-requested","blocked","unknown"].includes(pr.reason) ? "review" : "running";
-    groups[lane].push({key:pr.url,content:renderPull(pr,projectId)});
+  for(const entry of classifyProject({records,cards,pulls:requests})) {
+    const content = entry.kind==="record" ? <RecordPreview item={entry.item} theme={theme} render={renderRecord} links={recordLinks(entry.item)} />
+      : entry.kind==="session" ? <CardView card={entry.card} theme={theme} {...actions} />
+      : renderPull(entry.pr,projectId);
+    groups[entry.lane].push({key:entry.key,content});
   }
   const lanes=order.filter(lane=>groups[lane].length);
   const stacked = width ? width<490 : compact;

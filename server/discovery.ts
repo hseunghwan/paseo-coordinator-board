@@ -50,7 +50,19 @@ function observedState(agent: Entry["agent"]): Pick<SessionRow, "lane" | "detail
   return { lane: "unknown", detail: "세션 상태 미확인" };
 }
 
-export async function discoverSessions(paseo: Pick<Sdk, "agents" | "workspaces">): Promise<SessionRow[]> {
+// Selected project IDs outlive the project itself. Count only those the host still lists or still has sessions in.
+// known is null when the host listed no projects at all: that reads as a failed listing, not as every project gone.
+export function liveSelection(selected: readonly string[], known: ReadonlySet<string> | null) {
+  return new Set(known ? selected.filter(id => known.has(id)) : selected);
+}
+
+export function catalogProjects(catalog: { projects: readonly { projectId: string }[] }): ReadonlySet<string> | null {
+  return catalog.projects.length ? new Set(catalog.projects.map(project => project.projectId)) : null;
+}
+
+// knownProjects: the host's project catalog. When given, a session whose workspace no longer exists in a project the
+// catalog dropped is treated as removed with that project. Without it, every live session is kept.
+export async function discoverSessions(paseo: Pick<Sdk, "agents" | "workspaces">, knownProjects?: ReadonlySet<string>): Promise<SessionRow[]> {
   const [entries, workspaces] = await Promise.all([
     readPages<Entry>((page) => paseo.agents.list({
       filter: { includeArchived: false, includeBackground: true },
@@ -65,6 +77,10 @@ export async function discoverSessions(paseo: Pick<Sdk, "agents" | "workspaces">
   for (const { agent, project } of entries) {
     const workspace = agent.workspaceId ? byWorkspace.get(agent.workspaceId) : undefined;
     if (agent.archivedAt || agent.internal || workspace?.archivingAt) {
+      rows.delete(agent.id);
+      continue;
+    }
+    if (knownProjects && agent.workspaceId && !workspace && !knownProjects.has(project.projectKey)) {
       rows.delete(agent.id);
       continue;
     }
