@@ -2,26 +2,47 @@
 
 Paseo에서 여러 프로젝트를 운영할 때, 내가 결정할 일과 각 세션의 진행 상황을 한 화면에서 봅니다. **내 결정** 카드에서 작업 세션에 답하거나, 여러 작업의 순서를 조정해 달라고 코디네이터에 요청할 수 있습니다.
 
+[English overview](OVERVIEW.md)
+
+## 대시보드 미리보기
+
+예시 데이터로 본 **기존** 보기입니다. 위에서 코디네이터에 작업을 요청하고, 아래에서 결정과 프로젝트별 진행 상태를 확인합니다.
+
+![코디네이터 요청, 내 결정, 프로젝트별 칸반이 보이는 대시보드](assets/preview.png)
+
+<details>
+<summary>결정 카드와 진행 중인 세션 예시</summary>
+
+**내 결정**에서 질문과 문답을 읽고 담당 세션에 답할 수 있습니다.
+
+![받는 세션과 문답이 표시된 결정 카드](docs/pr-assets/decision-reply-cards/desktop-ko.png)
+
+**진행 중 모아보기**에서 여러 프로젝트의 실행 중인 세션을 확인할 수 있습니다.
+
+![프로젝트별 작업을 모은 진행 중 세션 목록](docs/pr-assets/running-sessions/board.png)
+
+</details>
+
 ## 설치하고 첫 카드 보기
 
-세션을 실행할 컴퓨터에 **Paseo 0.16.2 이상**이 필요합니다. 앱에서 **Settings → Plugins**를 열고 **Enable plugins**를 켜세요. **Plugin source**에 아래 설치 ID를 붙여 넣고 **Install plugin**을 누르세요. [공식 플러그인 페이지](https://paseo.sh/plugins/devbrother2024/coordinator-board)
+세션을 실행할 컴퓨터에 **Paseo 0.16.2 이상**과 Git이 필요합니다. 앱에서 **Settings → Plugins**를 열고 **Enable plugins**를 켜세요. **Plugin source**에 이 저장소의 Git 주소를 입력하고 **Install plugin**을 누르세요.
 
 ```text
-devbrother2024/coordinator-board
+git:hseunghwan/paseo-coordinator-board
 ```
 
 터미널에서 설치하려면 같은 컴퓨터에서 다음 명령을 실행하세요.
 
 ```sh
-paseo plugin install devbrother2024/coordinator-board
+paseo plugin install git:hseunghwan/paseo-coordinator-board --ref main
 paseo plugin ls coordinator-board
 ```
 
 상태가 `running`이면 사이드바에서 **세션별 코디네이터 보드**를 열고 관리할 프로젝트를 선택하세요. 기존 세션은 **프로젝트별 진행**에 나타납니다. **추천 설정으로 시작**을 눌러 코디네이터를 만든 뒤 **다이제스트 요청**을 누르면 답변이 필요한 항목을 확인할 수 있습니다.
 
-레지스트리로 설치한 보드의 새 버전을 확인하려면 `paseo plugin update coordinator-board --check`를 실행하세요. 업데이트하려면 `paseo plugin update coordinator-board`를 실행하고 제안된 변경을 확인합니다.
+Git으로 설치한 보드의 업데이트를 확인하려면 `paseo plugin update coordinator-board --check`를 실행하세요. 적용하려면 `paseo plugin update coordinator-board`를 실행하고 제안된 변경을 확인합니다.
 
-**Git·ZIP 설치**도 가능합니다. Git이 있는 호스트에서는 `paseo plugin install git:devbrother2024/paseo-coordinator-board --ref main`으로 기본 브랜치를 설치합니다. 이 문서의 버전을 설치하려면 `main` 자리에 `v0.6.0`를 넣으세요. 전체 커밋 SHA도 사용할 수 있습니다. ZIP은 압축을 푼 뒤 `paseo-plugin.json`이 있는 폴더에서 `paseo plugin install .`을 실행하고 그 폴더를 보관하세요. [Paseo 플러그인 안내](https://paseo.sh/docs/plugins)
+특정 커밋을 설치하려면 `--ref main`의 `main` 자리에 전체 커밋 SHA를 넣으세요. 플러그인 ZIP이 있다면 압축을 푼 뒤 `paseo-plugin.json`이 있는 폴더에서 `paseo plugin install .`을 실행하고 그 폴더를 보관하세요. [Paseo 플러그인 안내](https://paseo.sh/docs/plugins)
 
 **보드 보기** · 헤더의 **인박스 · 집중 · 매트릭스 · 기존**에서 화면 배치를 고를 수 있습니다. **설정 → 보드 보기**에서도 바꿀 수 있고, 선택은 기기별로 저장됩니다.
 

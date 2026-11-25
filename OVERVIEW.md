@@ -4,22 +4,22 @@ The board groups existing Paseo sessions by project and shows which decisions ne
 
 ## Install and choose projects
 
-On the computer running your sessions, use **Paseo 0.16.2 or later**. In **Settings → Plugins**, turn on **Enable plugins**, paste this install ID into **Plugin source**, then select **Install plugin**. [Official plugin directory](https://paseo.sh/plugins/devbrother2024/coordinator-board)
+On the computer running your sessions, use **Paseo 0.16.2 or later** and Git. In **Settings → Plugins**, turn on **Enable plugins**, paste this repository's Git source into **Plugin source**, then select **Install plugin**.
 
 ```text
-devbrother2024/coordinator-board
+git:hseunghwan/paseo-coordinator-board
 ```
 
 To install from the terminal on that host, run these commands and check that the board is `running`.
 
 ```sh
-paseo plugin install devbrother2024/coordinator-board
+paseo plugin install git:hseunghwan/paseo-coordinator-board --ref main
 paseo plugin ls coordinator-board
 ```
 
-For a registry installation, preview a new reviewed release with `paseo plugin update coordinator-board --check`. Run `paseo plugin update coordinator-board` to review and apply the update.
+For a Git installation, check for updates with `paseo plugin update coordinator-board --check`. Run `paseo plugin update coordinator-board` to review and apply the update.
 
-**Git and ZIP installations.** On a host with Git, run `paseo plugin install git:devbrother2024/paseo-coordinator-board --ref main` for the default branch, or replace `main` with `v0.5.12` for the release featured in the video. A full commit SHA also works. For a ZIP, extract the package and run `paseo plugin install .` in the folder containing `paseo-plugin.json`. Keep that folder in place. [Paseo plugin guide](https://paseo.sh/docs/plugins)
+To install a specific commit, replace `main` in `--ref main` with the full commit SHA. If you have a plugin ZIP, extract it and run `paseo plugin install .` in the folder containing `paseo-plugin.json`. Keep that folder in place. [Paseo plugin guide](https://paseo.sh/docs/plugins)
 
 Open the board from the sidebar and select the projects you want in your digest. To manage just one session from another project, open **Settings → Link a session from another project**. Search for the session, check its ID and source workspace, select a managed destination, then click **Link to this project**. The card appears once under its destination. The session keeps its original ID, workspace, files and conversation. **Unlink from project** removes the link. The card returns to its source project if that project is also managed.
 
