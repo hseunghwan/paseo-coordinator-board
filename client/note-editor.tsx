@@ -64,7 +64,7 @@ export function NoteEditor({ session, note, theme, onClose, onSave, onSetReporti
     <Modal title={t("세션 기록", "Session note")} open onOpenChange={(open) => { if (!open && !submitting.current) onClose(); }}>
       <Modal.Content>
         <Text style={{ fontSize: 17, fontWeight: "600", color: c.foreground }}>{session.title}</Text>
-        <ProjectText theme={theme} projects={[session.projectTitle]} style={{ fontSize: 13, color: c.foregroundMuted }}>{session.projectTitle} · {session.workspaceTitle}</ProjectText>
+        <ProjectText theme={theme} projectId={session.projectId} projects={[session.projectTitle]} style={{ fontSize: 13, color: c.foregroundMuted }}>{session.projectTitle} · {session.workspaceTitle}</ProjectText>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
           {(["question", "review", "done"] as const).map((type) => (
             <Button key={type} label={noteLabel(type, t)} theme={theme} selected={kind === type} disabled={busy} onPress={() => setKind(type)} />

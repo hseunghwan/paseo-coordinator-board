@@ -210,7 +210,7 @@ function RepositorySetting({project, title, theme, refresh}: {project: PullReque
   }
   const states = {ok:t("조회됨","Connected"), unmapped:t("저장소 연결 필요","Link a repository"), unavailable:t("조회 실패 · 호스트의 gh 연결 확인","Lookup failed · Check gh on the host"), off:t("꺼짐","Off"), truncated:t("일부 PR만 표시","Showing a partial PR list")};
   return <View style={{gap:6,padding:10,backgroundColor:c.surface1,borderRadius:8}}>
-    <ProjectText theme={theme} projects={[title]} selectable style={{color:c.foreground,fontWeight:"600"}}>{title}</ProjectText>
+    <ProjectText theme={theme} projectId={project.projectId} projects={[title]} selectable style={{color:c.foreground,fontWeight:"600"}}>{title}</ProjectText>
     <Text selectable style={{color:c.foregroundMuted}}>{project.repo ? project.repo + " · " : ""}{states[project.status]}</Text>
     <TextInput accessibilityLabel={t(title+" GitHub 저장소",title+" GitHub repository")} placeholder="owner/repository" autoCapitalize="none" autoCorrect={false}
       value={repo} onChangeText={setText} placeholderTextColor={c.foregroundMuted} style={{color:c.foreground,borderColor:c.border,borderWidth:1,borderRadius:6,padding:7}}/>

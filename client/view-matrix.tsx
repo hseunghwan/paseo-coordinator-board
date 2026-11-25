@@ -194,7 +194,7 @@ function WideMatrix({ rows, theme, projects, cell, mounted, onCell, wide }: {
     {rows.map(row => <View key={row.key} style={{ borderTopWidth: 1, borderColor: c.border }}>
       <View style={{ flexDirection: "row" }}>
         <View style={{ width: projectColumn, padding: space[3] }}>
-          <ProjectText theme={theme} projects={row.id === null ? [] : [row.title]} accessibilityRole="header" numberOfLines={2} style={{ color: row.id === null ? c.foregroundMuted : c.foreground, fontSize: fontSize.base }}>{row.title}</ProjectText>
+          <ProjectText theme={theme} projectId={row.id ?? undefined} projects={row.id === null ? [] : [row.title]} accessibilityRole="header" numberOfLines={2} style={{ color: row.id === null ? c.foregroundMuted : c.foreground, fontSize: fontSize.base }}>{row.title}</ProjectText>
         </View>
         {matrixColumns.map(column => <CellButton key={column} row={row} column={column} theme={theme} cell={cell} onCell={onCell} limit={3} style={{ flex: 1 }} />)}
         <View style={{ width: hostColumn, padding: space[3] }}>
@@ -232,7 +232,7 @@ function NarrowMatrix({ rows, theme, projects, cell, mounted, onCell }: {
           accessibilityLabel={`${row.title} · ${summary}`} onPress={() => toggle(row.key)}
           style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: space[2], padding: space[3], backgroundColor: pressed ? c.surface1 : "transparent" })}>
           <View style={{ flex: 1, gap: space[0.5] }}>
-            <ProjectText theme={theme} projects={row.id === null ? [] : [row.title]} numberOfLines={1} style={{ color: row.id === null ? c.foregroundMuted : c.foreground, fontSize: fontSize.base }}>{row.title}</ProjectText>
+            <ProjectText theme={theme} projectId={row.id ?? undefined} projects={row.id === null ? [] : [row.title]} numberOfLines={1} style={{ color: row.id === null ? c.foregroundMuted : c.foreground, fontSize: fontSize.base }}>{row.title}</ProjectText>
             <Text numberOfLines={1} style={{ color: c.foregroundMuted, fontSize: fontSize.sm }}>{summary}</Text>
           </View>
           <Text accessible={false} style={{ color: c.foregroundMuted }}>{expanded ? "▴" : "▾"}</Text>
@@ -269,7 +269,7 @@ function OrphanRemote({ groups, theme, projects }: { groups: ReturnType<typeof o
         const openRemote = projects.openRemote;
         return <View key={group.host.serverId + ":" + row.sessionId} style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: space[2] }}>
           <RunningMark theme={theme} />
-          <ProjectText theme={theme} projects={[projects.name(row.projectId)]} numberOfLines={1} style={{ color: c.foreground, fontSize: fontSize.sm }}>
+          <ProjectText theme={theme} projectId={row.projectId} projects={[projects.name(row.projectId)]} numberOfLines={1} style={{ color: c.foreground, fontSize: fontSize.sm }}>
             {[group.host.label, projects.name(row.projectId), title].join(" · ")}
           </ProjectText>
           {openRemote && <SessionChip theme={theme} label={t("세션", "Session")}

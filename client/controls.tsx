@@ -1,11 +1,12 @@
 import type { PluginScreenProps } from "@getpaseo/plugin/client";
-import type { ReactNode } from "react";
-import { ActivityIndicator, Pressable, Text, View, type TextProps } from "react-native";
+import { createContext, useContext, useState, type ReactNode } from "react";
+import { ActivityIndicator, Image, Pressable, Text, View, type TextProps } from "react-native";
 import { projectInitial, projectColorIndex } from "./project-icon";
 import { tint, toneColor, type Tone } from "./tone";
 
 export type Theme = PluginScreenProps["theme"];
 export type { Tone };
+export const ProjectIconSources = createContext<ReadonlyMap<string, string>>(new Map());
 
 // Paseo's spacing and type steps (styles/theme.ts). Values outside these steps drift between screens.
 export const space = { 0.5: 2, 1: 4, 1.5: 6, 2: 8, 3: 12, 4: 16, 6: 24, 8: 32 } as const;
@@ -15,9 +16,9 @@ export type ButtonVariant = "default" | "secondary" | "outline" | "ghost";
 
 // default is the one accent-filled action on a surface; secondary pairs with it; outline sits on a row;
 // ghost is chrome. A selected toggle uses the surface fill instead of a second accent.
-export function Button({ label, accessibilityLabel, describedBy, onPress, theme, selected = false, disabled = false, toggle = false, expanded, variant = "outline", size, project }: {
+export function Button({ label, accessibilityLabel, describedBy, onPress, theme, selected = false, disabled = false, toggle = false, expanded, variant = "outline", size, project, projectId }: {
   label: string; accessibilityLabel?: string; describedBy?: string; onPress: () => void; theme: Theme; selected?: boolean; disabled?: boolean; toggle?: boolean; expanded?: boolean;
-  variant?: ButtonVariant; size?: "sm"; project?: string;
+  variant?: ButtonVariant; size?: "sm"; project?: string; projectId?: string;
 }) {
   const c = theme.colors;
   const filled = variant === "default" && !selected;
@@ -28,7 +29,7 @@ export function Button({ label, accessibilityLabel, describedBy, onPress, theme,
     <Pressable accessibilityRole={toggle ? "checkbox" : "button"} aria-checked={toggle ? selected : undefined} aria-expanded={expanded} aria-describedby={describedBy} accessibilityLabel={accessibilityLabel ?? label} accessibilityState={toggle ? { disabled, checked:selected } : { disabled, selected, expanded }} disabled={disabled} onPress={onPress}
       style={({ pressed }) => ({ minHeight: size === "sm" ? 28 : 32, maxWidth: "100%", justifyContent: "center", borderRadius: 9999, paddingHorizontal: size === "sm" ? space[3] : space[4], paddingVertical: space[1],
         opacity: disabled ? 0.5 : pressed ? 0.7 : 1, borderWidth: 1, borderColor: border, backgroundColor: background })}>
-      <ProjectText theme={theme} projects={project ? [project] : []} style={{ fontSize: size === "sm" ? fontSize.sm : fontSize.base, fontWeight: "500", color }}>{label}</ProjectText>
+      <ProjectText theme={theme} projects={project ? [project] : []} projectId={projectId} style={{ fontSize: size === "sm" ? fontSize.sm : fontSize.base, fontWeight: "500", color }}>{label}</ProjectText>
     </Pressable>
   );
 }
@@ -88,8 +89,13 @@ export function RunningMark({ theme, label }: { theme: Theme; label?: string }) 
   </View>;
 }
 
-function ProjectIcon({ name, theme }: { name: string; theme: Theme }) {
+function ProjectIcon({ name, projectId, theme }: { name: string; projectId?: string; theme: Theme }) {
+  const sources = useContext(ProjectIconSources);
+  const uri = sources.get(projectId ? "id:" + projectId : "name:" + name);
+  const [failed, setFailed] = useState<string>();
   const c = theme.colors;
+  if (uri && uri !== failed) return <Image accessible={false} aria-hidden source={{ uri }} resizeMode="contain"
+    onError={() => setFailed(uri)} style={{ width: 17, height: 17, flexShrink: 0, borderRadius: 5 }} />;
   const colors = [c.accent, c.statusSuccess, c.statusWarning, c.statusDanger];
   const color = colors[projectColorIndex(name, colors.length)];
   return <View aria-hidden accessibilityElementsHidden importantForAccessibility="no-hide-descendants"
@@ -98,10 +104,10 @@ function ProjectIcon({ name, theme }: { name: string; theme: Theme }) {
   </View>;
 }
 
-export function ProjectText({ theme, projects, style, ...props }: TextProps & { theme: Theme; projects: readonly string[] }) {
+export function ProjectText({ theme, projects, projectId, style, ...props }: TextProps & { theme: Theme; projects: readonly string[]; projectId?: string }) {
   if (!projects.length) return <Text {...props} style={style} />;
   return <View style={{ flexDirection: "row", alignItems: "center", gap: space[1.5], flexShrink: 1, minWidth: 0 }}>
-    {[...new Set(projects)].map(name => <ProjectIcon key={name} name={name} theme={theme} />)}
+    {[...new Set(projects)].map(name => <ProjectIcon key={name} name={name} projectId={projectId} theme={theme} />)}
     <Text {...props} style={[style, { flexShrink: 1 }]} />
   </View>;
 }

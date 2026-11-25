@@ -130,7 +130,7 @@ export function Project({projectId,title,decisions,cards,records,history=[],hist
     <Column lane={lane} entries={groups[lane]} theme={theme} />
   </View>);
   return <View style={{gap:8}} onLayout={e=>setWidth(e.nativeEvent.layout.width)}>
-    <ProjectText theme={theme} projects={projectId ? [title] : []} accessibilityRole="header" style={{fontSize:18,fontWeight:"600",color:theme.colors.foreground}}>{title}</ProjectText>
+    <ProjectText theme={theme} projectId={projectId} projects={projectId ? [title] : []} accessibilityRole="header" style={{fontSize:18,fontWeight:"600",color:theme.colors.foreground}}>{title}</ProjectText>
     <Text style={{fontSize:13,color:theme.colors.foregroundMuted}}>
       {t(`세션 ${cards.length}개 · 진행 중인 세션 ${running}개 · 내 결정 ${decisions}건`,`Sessions ${cards.length} · Running sessions ${running} · My decisions ${decisions}`)}
     </Text>

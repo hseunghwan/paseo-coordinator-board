@@ -73,7 +73,7 @@ export function SessionProgress({ cards, peers, peersLoading, hostLabel, project
             <RunningMark theme={theme} />
             <View style={{ flex: 1, gap: 3 }}>
               <Text selectable style={{ fontSize: 14, fontWeight: "600", color: c.foreground }}>{title}</Text>
-              <ProjectText theme={theme} projects={[project]} selectable style={{ fontSize: 12, color: c.foregroundMuted }}>{project} · {row.hostLabel}</ProjectText>
+              <ProjectText theme={theme} projectId={row.projectId} projects={[project]} selectable style={{ fontSize: 12, color: c.foregroundMuted }}>{project} · {row.hostLabel}</ProjectText>
             </View>
             {visit && <SessionChip theme={theme} label={t("세션 열기", "Open session")}
               accessibilityLabel={t(`세션 열기 · ${title}`, `Open session · ${title}`) + " · " + project + " · " + row.hostLabel} onPress={visit} />}

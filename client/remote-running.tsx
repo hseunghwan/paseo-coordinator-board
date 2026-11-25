@@ -62,7 +62,7 @@ function HostRunning({ host, rows, failed, projects, theme, open }: RemoteGroup 
       return <View key={row.sessionId} style={{flexDirection:"row",flexWrap:"wrap",alignItems:"center",gap:6}}>
         <RunningMark theme={theme} />
         <View style={{flex:1}}>
-          <ProjectText theme={theme} projects={[project.title]} selectable style={{color:c.foreground}}>{project.title} · {title}</ProjectText>
+          <ProjectText theme={theme} projectId={project.id} projects={[project.title]} selectable style={{color:c.foreground}}>{project.title} · {title}</ProjectText>
         </View>
         {open && <SessionChip theme={theme} label={t("담당 세션","Task session")}
           accessibilityLabel={t(`${host.label} · ${title} 열기`,`Open ${title} on ${host.label}`)} onPress={() => open(host.serverId,row.sessionId)} />}

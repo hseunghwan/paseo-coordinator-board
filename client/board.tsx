@@ -295,7 +295,7 @@ export function BoardView({ snapshot, readiness, theme, layout, hostLabel, hostI
     style={{flexDirection:"row", flexWrap:"wrap", alignItems:"center", gap:space[2]}}>
     <Button theme={theme} size="sm" label={t(`전체 ${total}`,`All ${total}`)} selected={!filters.length} onPress={() => setChosenProjects([])} />
     {[...byProject].map(([id,count]) => <Button key={JSON.stringify(id)} theme={theme} size="sm" toggle selected={filters.includes(id)}
-      project={id === null ? undefined : projectName(id)} label={`${projectName(id)} · ${count}`} onPress={() => toggleFilter(id)} />)}
+      projectId={id ?? undefined} project={id === null ? undefined : projectName(id)} label={`${projectName(id)} · ${count}`} onPress={() => toggleFilter(id)} />)}
   </View> : null;
   const noticesNode = snapshot ? <>
     {incomplete &&
@@ -357,7 +357,7 @@ export function BoardView({ snapshot, readiness, theme, layout, hostLabel, hostI
       {snapshot.projects.map(project => {
         const duplicateName = snapshot.projects.some(other => other.id !== project.id && other.title === project.title);
         const label = duplicateName ? `${project.title} · ${project.path || project.id}` : project.title;
-        return <Button key={project.id} theme={theme} size="sm" toggle project={project.title} selected={project.selected} disabled={actions.changing}
+        return <Button key={project.id} theme={theme} size="sm" toggle projectId={project.id} project={project.title} selected={project.selected} disabled={actions.changing}
           label={project.selected ? `✓ ${label}` : label} accessibilityLabel={label}
           onPress={() => onProject(project.id, !project.selected)} />;
       })}
@@ -392,7 +392,7 @@ export function BoardView({ snapshot, readiness, theme, layout, hostLabel, hostI
         {pickSession && <>
           {snapshot.coordinator && <Button theme={theme} disabled={actions.changing} label={t("현재 코디네이터 지정 해제", "Clear current coordinator")} onPress={() => actions.onCoordinator?.(null)} />}
           {snapshot.sessions.filter(s => s.id !== snapshot.coordinator).map(s => <Button key={s.id} theme={theme} disabled={actions.changing}
-            project={s.projectTitle} label={`${s.projectTitle} · ${s.title} · ${t("지정", "Assign")}`} onPress={() => actions.onCoordinator?.(s.id)} />)}
+            projectId={s.projectId} project={s.projectTitle} label={`${s.projectTitle} · ${s.title} · ${t("지정", "Assign")}`} onPress={() => actions.onCoordinator?.(s.id)} />)}
           {!snapshot.sessions.length && <Text style={{ color: c.foregroundMuted }}>{t("관리할 프로젝트를 선택하면 지정할 수 있는 세션이 표시됩니다.", "Select a project to see its available sessions.")}</Text>}
         </>}
       </View>}

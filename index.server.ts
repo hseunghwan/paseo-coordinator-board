@@ -27,6 +27,7 @@ import { NoteStore } from "./server/notes";
 import { askClarification, sourceQuestion } from "./shared/clarifications";
 import { ClarificationSender, clarificationHistory, restoreClarifiedDecision } from "./server/clarifications";
 import { BoardFacts } from "./server/board-facts";
+import { readProjectIcon } from "./server/project-icons";
 
 export default function contribute(server: PluginServerContext) {
   server.registerSettings(hostVisibility);
@@ -131,12 +132,13 @@ export default function contribute(server: PluginServerContext) {
     catalog: Awaited<ReturnType<PluginHandlerContext["paseo"]["projects"]["list"]>>,
     rows: Awaited<ReturnType<typeof discoverSessions>>) {
     const scope = prefs.read();
-    const choices = new Map(catalog.projects.map(p => {
+    const choices = new Map(await Promise.all(catalog.projects.map(async p => {
       const id = p.projectId;
-      return [id, { id, title: p.projectCustomName || p.projectDisplayName, path: p.projectRootPath, selected: scope.projects.includes(id) }];
-    }));
+      const icon = await readProjectIcon(home, id, p.projectCustomIconRevision);
+      return [id, { id, title: p.projectCustomName || p.projectDisplayName, path: p.projectRootPath, selected: scope.projects.includes(id), icon }] as const;
+    })));
     for (const row of rows) {
-      if (!choices.has(row.projectId)) choices.set(row.projectId, { id: row.projectId, title: row.projectTitle, path: "", selected: scope.projects.includes(row.projectId) });
+      if (!choices.has(row.projectId)) choices.set(row.projectId, { id: row.projectId, title: row.projectTitle, path: "", selected: scope.projects.includes(row.projectId), icon: undefined });
     }
     const titles = new Map([...choices].map(([id, p]) => [id, p.title]));
     const sessions = managedSessions(rows, scope, titles);

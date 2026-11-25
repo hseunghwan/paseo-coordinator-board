@@ -114,7 +114,7 @@ function LinkPicker({ projects, theme, onChange }: Props) {
         {!!eligible.length && <Text style={{ color: c.foreground }}>{t("연결 대상 프로젝트", "Destination project")}</Text>}
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 5 }}>
           {eligible.map(p => <Button theme={theme} key={p.id} disabled={busy || p.id === session.targetProjectId}
-            project={p.title} label={projectName(p, projects)} selected={p.id === target} onPress={() => { setTarget(p.id); setSaved(null); }} />)}
+            projectId={p.id} project={p.title} label={projectName(p, projects)} selected={p.id === target} onPress={() => { setTarget(p.id); setSaved(null); }} />)}
         </View>
         {!!destination && <Button theme={theme} disabled={busy} label={t("이 프로젝트에 연결", "Link to this project")} onPress={() => void change(destination)} />}
       </>}

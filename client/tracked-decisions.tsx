@@ -176,7 +176,7 @@ function DecisionRecord({ item, theme, links, recipientId, onResolved, children,
 
   return <View style={{ gap: 7 }}>
     <View style={{ ...wrap, alignItems: "center" }}>
-      <ProjectText theme={theme} projects={item.projectId && source ? [source] : []} selectable style={{ color: c.foregroundMuted, fontSize: 12 }}>{[source || t("보드 공통", "Board-wide"), t(words[0], words[1]), where, item.owner, priorityLabel].filter(Boolean).join(" · ")}</ProjectText>
+      <ProjectText theme={theme} projectId={item.projectId ?? undefined} projects={item.projectId && source ? [source] : []} selectable style={{ color: c.foregroundMuted, fontSize: 12 }}>{[source || t("보드 공통", "Board-wide"), t(words[0], words[1]), where, item.owner, priorityLabel].filter(Boolean).join(" · ")}</ProjectText>
       <TrackedSessionChips title={item.title} theme={theme} links={links} />
     </View>
     <HistoryMarkdown theme={theme} source={isMerge ? t("PR 병합", "PR merge") : item.title} heading />

@@ -129,7 +129,7 @@ export function DecisionActions({ card, theme, hostLabel, coordinator, coordinat
   return <View style={{ gap: 7, ...(embedded && { paddingTop: 10, borderTopWidth: 1, borderColor: c.border }) }}>
     <HistoryMarkdown theme={theme} source={headline} heading />
     <View style={{ ...wrap, alignItems: "center" }}>
-      <ProjectText theme={theme} projects={[session.projectTitle]} selectable style={{ color: c.foregroundMuted, fontSize: 12 }}>{[marker, priorityLabel].filter(Boolean).join(" · ")}</ProjectText>
+      <ProjectText theme={theme} projectId={session.projectId} projects={[session.projectTitle]} selectable style={{ color: c.foregroundMuted, fontSize: 12 }}>{[marker, priorityLabel].filter(Boolean).join(" · ")}</ProjectText>
       {open && <SessionChip theme={theme} label={t("담당 세션", "Assigned session")} accessibilityLabel={named(t("담당 세션 열기", "Open assigned session")).accessibilityLabel} onPress={() => open(session.id)} />}
     </View>
     {formal || !decision ? formal && <Text style={{ color: c.foregroundMuted }}>

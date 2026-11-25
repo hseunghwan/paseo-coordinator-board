@@ -164,7 +164,7 @@ function ActivityStrip({ props, pad, open, onToggle, t }: { props: BoardLayoutPr
         return <View key={project.id} accessible accessibilityLabel={[project.name, t(`진행 중 ${project.running}`, `${project.running} running`),
           project.attention ? t("확인 대기 또는 오류", "Needs review or failed") : ""].filter(Boolean).join(" · ")}
           style={{ flexDirection: "row", alignItems: "center", gap: space[1] }}>
-          <ProjectText theme={theme} projects={[project.name]} numberOfLines={1} style={{ color: c.foreground, fontSize: fontSize.sm, maxWidth: 160 }}>{project.name}</ProjectText>
+          <ProjectText theme={theme} projectId={project.id} projects={[project.name]} numberOfLines={1} style={{ color: c.foreground, fontSize: fontSize.sm, maxWidth: 160 }}>{project.name}</ProjectText>
           {Array.from({ length: marks }, (_, i) => <RunningMark key={i} theme={theme} />)}
           {extra > 0 && <Text style={{ color: c.foregroundMuted, fontSize: fontSize.sm }}>+{extra}</Text>}
           {project.attention && <StatusDot theme={theme} tone="danger" />}
