@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { usePaseo } from "@getpaseo/plugin/client";
-import { discoverSessions } from "../server/discovery";
+import { catalogProjects, discoverSessions, liveSelection } from "../server/discovery";
 
 type Sdk = ReturnType<typeof usePaseo>;
 type Agent = Awaited<ReturnType<Sdk["agents"]["list"]>>["entries"][number]["agent"];
@@ -110,4 +110,27 @@ test("permission wait starts at the permission attention event, never a later se
   ])));
   assert.equal(rows[0].decisionRequestedAt, at);
   assert.equal(rows[1].decisionRequestedAt, undefined);
+});
+
+test("삭제된 프로젝트의 사라진 워크스페이스에 남은 세션은 프로젝트 목록을 받으면 빠진다", async () => {
+  const workspace = { id: "live", title: "작업 폴더", name: "branch", projectId: "kept", projectDisplayName: "남은 프로젝트" };
+  const sdk = directory(() => page([
+    entry({ id: "in-live-workspace", workspaceId: "live" }, "kept"),
+    entry({ id: "deleted-project", workspaceId: "gone" }, "deleted"),
+    entry({ id: "workspace-gone-project-kept", workspaceId: "gone" }, "kept"),
+    entry({ id: "no-workspace", workspaceId: undefined }, "deleted"),
+  ]), () => page([workspace]));
+  const known = new Set(["kept"]);
+  assert.deepEqual((await discoverSessions(sdk, known)).map(row => row.id), ["in-live-workspace", "workspace-gone-project-kept", "no-workspace"]);
+  // Callers that do not pass the catalog keep every live session, as before.
+  assert.deepEqual((await discoverSessions(sdk)).map(row => row.id), ["in-live-workspace", "deleted-project", "workspace-gone-project-kept", "no-workspace"]);
+});
+
+test("저장된 관리 프로젝트 중 지금 호스트에 있는 것만 집계한다", () => {
+  assert.deepEqual([...liveSelection(["a", "deleted", "b"], new Set(["a", "b", "c"]))], ["a", "b"]);
+  assert.deepEqual([...liveSelection([], new Set(["a"]))], []);
+  // An empty project listing reads as a failed read, so nothing is hidden.
+  assert.equal(catalogProjects({ projects: [] }), null);
+  assert.deepEqual([...liveSelection(["a", "b"], catalogProjects({ projects: [] }))], ["a", "b"]);
+  assert.deepEqual([...catalogProjects({ projects: [{ projectId: "a" }] }) ?? []], ["a"]);
 });

@@ -11,7 +11,7 @@ import type { PluginHandlerContext, PluginServerContext } from "@getpaseo/plugin
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { boardDecisionCount, boardScope, boardSnapshot, reportingKey, saveNote, setReporting } from "./shared/contract";
-import { canReceiveBoardInput, discoverSessions } from "./server/discovery";
+import { canReceiveBoardInput, catalogProjects, discoverSessions, liveSelection } from "./server/discovery";
 import { attachReportTool } from "./server/reporting";
 import { ConversationReader, excerpt } from "./server/conversation";
 import { isManagedCoordinator, setCoordinator, PreferenceStore } from "./server/preferences";
@@ -67,7 +67,8 @@ export default function contribute(server: PluginServerContext) {
     const catalogRead = paseo.projects.list();
     const [sessionView, fetched] = await Promise.all([
       (async () => {
-        const [catalog, rows] = await Promise.all([catalogRead, discoverSessions(paseo)]);
+        const catalog = await catalogRead;
+        const rows = await discoverSessions(paseo, catalogProjects(catalog) ?? undefined);
         return buildSessionView(paseo, catalog, rows);
       })(),
       catalogRead.then(({ projects }) => prs.read(paseo, { projects, refresh:refreshPulls })),
@@ -85,7 +86,8 @@ export default function contribute(server: PluginServerContext) {
       decorateDecision(row, visibleNotes[row.id], latest, evidence.get(row.id));
       restoreClarifiedDecision(row, visibleNotes[row.id], latest, evidence.get(row.id));
     }
-    const selected = new Set(latest.projects);
+    // A deleted project stays in the saved selection so it returns if restored, but shows nothing meanwhile.
+    const selected = liveSelection(latest.projects, catalogProjects(await catalogRead) && new Set(choices.keys()));
     const pullRequests = {
       projects: fetched.projects.filter(p => selected.has(p.projectId)),
       items: fetched.items.map(pr => ({ ...pr, projectIds: pr.projectIds.filter(id => selected.has(id)) })).filter(pr => pr.projectIds.length),

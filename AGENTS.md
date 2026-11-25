@@ -19,7 +19,7 @@ Tech Stack: TypeScript, React 19 + React Native 0.81(클라이언트), Node(플�
 ### Immutable
 
 - 플러그인 서버가 스스로 시작하는 전송에는 반드시 `sourceAgentId`를 붙인다. 출처 없는 전송은 받는 세션 기록에 사람이 쓴 말과 같은 꼴로 남고, 받는 쪽은 그것을 승인으로 읽을 수 있다. 출처 없는 `send`는 사용자가 화면에서 쓰고 누른 글에만 쓴다(받는 세션이 바빠 대기열에 넣었다가 나중에 보내는 답 포함). 보드가 만든 문장을 그 길로 보내지 않는다.
-  - 근거(비대칭): 보드가 만든 문장을 보내는 `server/board-facts.ts:220`과 `server/merge-notifications.ts:115`는 `sourceAgentId`를 붙인다. 사용자 글을 보내는 `server/decisions.ts:178`, `server/digest.ts:64`, `server/tracked-decisions.ts:321`, 대기 답장의 `index.server.ts:234`는 붙이지 않는다.
+  - 근거(비대칭): 보드가 만든 문장을 보내는 `server/board-facts.ts:220`과 `server/merge-notifications.ts:115`는 `sourceAgentId`를 붙인다. 사용자 글을 보내는 `server/decisions.ts:178`, `server/digest.ts:64`, `server/tracked-decisions.ts:321`, 대기 답장의 `index.server.ts:236`는 붙이지 않는다.
   - `server/board-facts.ts:219` 주석대로, 출처를 붙인 전송이 실패하면 출처 없는 전송으로 다시 보내지 않는다. 자동 재시도도 하지 않는다.
 - 권한 요청을 기다리는 세션에는 보내지 않는다. Paseo는 메시지를 받은 세션의 대기 중 권한 요청을 지운다. 새 전송 경로를 만들 때 같은 검사를 넣는다.
   - 근거(이중 방어): `server/discovery.ts:18`(`canReceiveBoardInput`), `server/merge-notifications.ts:110`, `server/board-facts.ts:201`.
