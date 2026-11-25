@@ -2,7 +2,7 @@ import { useBoardLanguage } from "./language";
 import { Modal, TextInput } from "@getpaseo/plugin/client/ui";
 import { useRef, useState } from "react";
 import { Text, View } from "react-native";
-import { Button, type Theme } from "./controls";
+import { Button, ProjectText, type Theme } from "./controls";
 import { noteLabel, noteLabels, type Note, type NoteInput, type Session } from "./model";
 
 type Props = {
@@ -64,7 +64,7 @@ export function NoteEditor({ session, note, theme, onClose, onSave, onSetReporti
     <Modal title={t("세션 기록", "Session note")} open onOpenChange={(open) => { if (!open && !submitting.current) onClose(); }}>
       <Modal.Content>
         <Text style={{ fontSize: 17, fontWeight: "600", color: c.foreground }}>{session.title}</Text>
-        <Text style={{ fontSize: 13, color: c.foregroundMuted }}>{session.projectTitle} · {session.workspaceTitle}</Text>
+        <ProjectText theme={theme} projectId={session.projectId} projects={[session.projectTitle]} style={{ fontSize: 13, color: c.foregroundMuted }}>{session.projectTitle} · {session.workspaceTitle}</ProjectText>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
           {(["question", "review", "done"] as const).map((type) => (
             <Button key={type} label={noteLabel(type, t)} theme={theme} selected={kind === type} disabled={busy} onPress={() => setKind(type)} />

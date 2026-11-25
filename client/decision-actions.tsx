@@ -9,7 +9,7 @@ import { DecisionReplyInput } from "./decision-reply";
 import { SendButton } from "./send-input";
 import { sessionReplyDraft } from "./decision-reply-state";
 import { decisionSummary } from "./decision-summary";
-import { Button, SessionChip, type Theme } from "./controls";
+import { Button, ProjectText, SessionChip, type Theme } from "./controls";
 import { useBoardLanguage } from "./language";
 import type { Card } from "./model";
 import { PhotoComposer, usePhotoDraft } from "./photo-composer";
@@ -129,7 +129,7 @@ export function DecisionActions({ card, theme, hostLabel, coordinator, coordinat
   return <View style={{ gap: 7, ...(embedded && { paddingTop: 10, borderTopWidth: 1, borderColor: c.border }) }}>
     <HistoryMarkdown theme={theme} source={headline} heading />
     <View style={{ ...wrap, alignItems: "center" }}>
-      <Text selectable style={{ color: c.foregroundMuted, fontSize: 12, flexShrink: 1 }}>{[marker, priorityLabel].filter(Boolean).join(" · ")}</Text>
+      <ProjectText theme={theme} projectId={session.projectId} projects={[session.projectTitle]} selectable style={{ color: c.foregroundMuted, fontSize: 12 }}>{[marker, priorityLabel].filter(Boolean).join(" · ")}</ProjectText>
       {open && <SessionChip theme={theme} label={t("담당 세션", "Assigned session")} accessibilityLabel={named(t("담당 세션 열기", "Open assigned session")).accessibilityLabel} onPress={() => open(session.id)} />}
     </View>
     {formal || !decision ? formal && <Text style={{ color: c.foregroundMuted }}>

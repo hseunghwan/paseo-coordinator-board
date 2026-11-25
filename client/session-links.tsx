@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import type { z } from "zod";
 import { linkSession, listSessionLinks } from "../shared/session-links";
-import { Button, type Theme } from "./controls";
+import { Button, Disclosure, type Theme } from "./controls";
 import { useBoardLanguage } from "./language";
 import type { Snapshot } from "./model";
 
@@ -101,7 +101,7 @@ function LinkPicker({ projects, theme, onChange }: Props) {
     {!busy && !error && !filtered.length && <Text style={{ color: c.foregroundMuted }}>{t("일치하는 세션이 없습니다.", "No matching sessions.")}</Text>}
     {filtered.slice(0, limit).map(row => {
       const name = [row.title, row.sourceProjectTitle, row.workspaceTitle, row.sessionId].filter(Boolean).join(" · ");
-      return <Button key={row.sessionId} theme={theme} selected={chosen === row.sessionId} disabled={busy}
+      return <Button key={row.sessionId} theme={theme} project={row.sourceProjectTitle} selected={chosen === row.sessionId} disabled={busy}
         label={name + (row.available ? "" : t(" · 세션 없음", " · Missing session"))} onPress={() => start(row)} />;
     })}
     {limit < filtered.length && <Button theme={theme} label={t(`세션 더 보기 (${filtered.length - limit})`, `Show more sessions (${filtered.length - limit})`)} onPress={() => setLimit(limit + 12)} />}
@@ -114,7 +114,7 @@ function LinkPicker({ projects, theme, onChange }: Props) {
         {!!eligible.length && <Text style={{ color: c.foreground }}>{t("연결 대상 프로젝트", "Destination project")}</Text>}
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 5 }}>
           {eligible.map(p => <Button theme={theme} key={p.id} disabled={busy || p.id === session.targetProjectId}
-            label={projectName(p, projects)} selected={p.id === target} onPress={() => { setTarget(p.id); setSaved(null); }} />)}
+            projectId={p.id} project={p.title} label={projectName(p, projects)} selected={p.id === target} onPress={() => { setTarget(p.id); setSaved(null); }} />)}
         </View>
         {!!destination && <Button theme={theme} disabled={busy} label={t("이 프로젝트에 연결", "Link to this project")} onPress={() => void change(destination)} />}
       </>}
@@ -126,8 +126,7 @@ function LinkPicker({ projects, theme, onChange }: Props) {
 export function SessionLinks(props: Props) {
   const { t } = useBoardLanguage();
   const [opened, setOpened] = useState(false);
-  return <View style={{ gap: 8 }}>
-    <Button theme={props.theme} label={opened ? t("세션 연결 목록 닫기", "Close session links") : t("다른 프로젝트의 세션 하나 연결", "Link a session from another project")} onPress={() => setOpened(!opened)} />
-    {opened && <LinkPicker {...props} />}
-  </View>;
+  return <Disclosure theme={props.theme} title={t("다른 프로젝트의 세션 하나 연결", "Link a session from another project")} expanded={opened} onPress={() => setOpened(!opened)}>
+    <LinkPicker {...props} />
+  </Disclosure>;
 }

@@ -1,7 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Pressable, ScrollView, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import type { BoardLayoutProps, DecisionEntry, ProjectBundle } from "./board-layout";
-import { Button, RunningMark, SectionLabel, SessionChip, StatusBadge, StatusDot, fontSize, space, type Theme } from "./controls";
+import { Button, ProjectText, RunningMark, SectionLabel, SessionChip, StatusBadge, StatusDot, fontSize, space, type Theme } from "./controls";
 import { decisionGroupLabel } from "./decision-row";
 import { useBoardLanguage } from "./language";
 import {
@@ -85,9 +85,9 @@ function DecisionRibbon({ theme, entries, renderReceipt, name }: {
               borderColor: chosen ? c.foregroundMuted : c.border, backgroundColor: pressed ? c.surface1 : c.surface0 })}>
             <StatusBadge theme={theme} tone={summary.tone} label={entry.label ?? decisionGroupLabel(summary.group, t)} />
             <Text numberOfLines={2} style={{ color: c.foreground, fontSize: fontSize.base }}>{summary.title}</Text>
-            <Text numberOfLines={1} style={{ color: c.foregroundMuted, fontSize: fontSize.sm }}>
+            <ProjectText theme={theme} projects={summary.projectIds.filter(id => id !== null).map(name)} numberOfLines={1} style={{ color: c.foregroundMuted, fontSize: fontSize.sm }}>
               {summary.permission ? `${project} · ${t("세션에서 승인", "Approve in session")}` : project}
-            </Text>
+            </ProjectText>
           </Pressable>;
         })}
       </ScrollView>
@@ -170,7 +170,6 @@ const projectColumn = 180;
 const hostColumn = 96;
 
 function HeaderMark({ column, theme }: { column: MatrixColumn; theme: Theme }) {
-  if (column === "running") return <RunningMark theme={theme} />;
   return <StatusDot theme={theme} tone={column === "human" ? "warning" : column === "done" ? "success" : column === "idle" ? "idle" : "muted"} />;
 }
 
@@ -195,7 +194,7 @@ function WideMatrix({ rows, theme, projects, cell, mounted, onCell, wide }: {
     {rows.map(row => <View key={row.key} style={{ borderTopWidth: 1, borderColor: c.border }}>
       <View style={{ flexDirection: "row" }}>
         <View style={{ width: projectColumn, padding: space[3] }}>
-          <Text accessibilityRole="header" numberOfLines={2} style={{ color: row.id === null ? c.foregroundMuted : c.foreground, fontSize: fontSize.base }}>{row.title}</Text>
+          <ProjectText theme={theme} projectId={row.id ?? undefined} projects={row.id === null ? [] : [row.title]} accessibilityRole="header" numberOfLines={2} style={{ color: row.id === null ? c.foregroundMuted : c.foreground, fontSize: fontSize.base }}>{row.title}</ProjectText>
         </View>
         {matrixColumns.map(column => <CellButton key={column} row={row} column={column} theme={theme} cell={cell} onCell={onCell} limit={3} style={{ flex: 1 }} />)}
         <View style={{ width: hostColumn, padding: space[3] }}>
@@ -233,7 +232,7 @@ function NarrowMatrix({ rows, theme, projects, cell, mounted, onCell }: {
           accessibilityLabel={`${row.title} · ${summary}`} onPress={() => toggle(row.key)}
           style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: space[2], padding: space[3], backgroundColor: pressed ? c.surface1 : "transparent" })}>
           <View style={{ flex: 1, gap: space[0.5] }}>
-            <Text numberOfLines={1} style={{ color: row.id === null ? c.foregroundMuted : c.foreground, fontSize: fontSize.base }}>{row.title}</Text>
+            <ProjectText theme={theme} projectId={row.id ?? undefined} projects={row.id === null ? [] : [row.title]} numberOfLines={1} style={{ color: row.id === null ? c.foregroundMuted : c.foreground, fontSize: fontSize.base }}>{row.title}</ProjectText>
             <Text numberOfLines={1} style={{ color: c.foregroundMuted, fontSize: fontSize.sm }}>{summary}</Text>
           </View>
           <Text accessible={false} style={{ color: c.foregroundMuted }}>{expanded ? "▴" : "▾"}</Text>
@@ -270,9 +269,9 @@ function OrphanRemote({ groups, theme, projects }: { groups: ReturnType<typeof o
         const openRemote = projects.openRemote;
         return <View key={group.host.serverId + ":" + row.sessionId} style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: space[2] }}>
           <RunningMark theme={theme} />
-          <Text numberOfLines={1} style={{ flexGrow: 1, flexShrink: 1, color: c.foreground, fontSize: fontSize.sm }}>
+          <ProjectText theme={theme} projectId={row.projectId} projects={[projects.name(row.projectId)]} numberOfLines={1} style={{ color: c.foreground, fontSize: fontSize.sm }}>
             {[group.host.label, projects.name(row.projectId), title].join(" · ")}
-          </Text>
+          </ProjectText>
           {openRemote && <SessionChip theme={theme} label={t("세션", "Session")}
             accessibilityLabel={t(`${group.host.label} · ${title} 열기`, `Open ${title} on ${group.host.label}`)} onPress={() => openRemote(group.host.serverId, row.sessionId)} />}
         </View>;

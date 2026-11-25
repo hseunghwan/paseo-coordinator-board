@@ -3,7 +3,7 @@ import { getPaseoClient, useHosts, useSettings } from "@getpaseo/plugin/client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Text, View } from "react-native";
 import { boardHosts, hiddenAfter, hostVisibility, type BoardHost } from "../shared/hosts";
-import { Button, type Theme } from "./controls";
+import { Button, ProjectText, type Theme } from "./controls";
 
 const statusText = {
   online: ["연결됨", "Online"], connecting: ["연결 중", "Connecting"], idle: ["연결 대기", "Idle"],
@@ -139,7 +139,7 @@ function HostSessions({ host, theme, open }: { host: BoardHost; theme: Theme; op
     {rows.map(row => {
       const title = row.title || t(`세션 ${row.id.slice(0, 8)}`, `Session ${row.id.slice(0, 8)}`);
       return <View key={row.id} style={{ ...wrap, alignItems: "center", justifyContent: "space-between", borderTopWidth: 1, borderColor: c.border, paddingTop: 6 }}>
-        <Text style={{ flexShrink: 1, color: c.foreground }}>{[row.project, title].filter(Boolean).join(" · ")}</Text>
+        <ProjectText theme={theme} projects={row.project ? [row.project] : []} style={{ flexShrink: 1, color: c.foreground }}>{[row.project, title].filter(Boolean).join(" · ")}</ProjectText>
         {open && <Button theme={theme} label={t("세션 열기", "Open session")} accessibilityLabel={t(`${host.label} · ${title} 열기`, `Open ${title} on ${host.label}`)} onPress={() => open(host.serverId, row.id)} />}
       </View>;
     })}

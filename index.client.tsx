@@ -4,7 +4,7 @@ import { decisionCount } from "./shared/decision-count";
 import type { z } from "zod";
 import { useRpc, type PluginClientContext, type PluginScreenProps, type PluginSidebarItemProps } from "@getpaseo/plugin/client";
 import { SidebarRow } from "@getpaseo/plugin/client/ui";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { boardScope, boardSnapshot, saveNote, setReporting } from "./shared/contract";
 import { BoardLanguageProvider, useBoardLanguage } from "./client/language";
 import { BoardView } from "./client/board";
@@ -12,6 +12,8 @@ import { NoteEditor } from "./client/note-editor";
 import { SessionPhotoMessage } from "./client/session-photos";
 import { boardPhotoMessageSchema, isBoardPhotoMessage } from "./shared/session-photos";
 import type { NoteInput, Snapshot } from "./client/model";
+import { ProjectIconSources } from "./client/controls";
+import { projectIconSources } from "./client/project-icon";
 
 function HostBoard({ host, theme, layout, navigation }: PluginScreenProps) {
   const getBoard = useRpc(boardSnapshot);
@@ -84,7 +86,8 @@ function HostBoard({ host, theme, layout, navigation }: PluginScreenProps) {
     return result;
   };
   const session = editing && snapshot?.sessions.find((row) => row.id === editing);
-  return <>
+  const icons = useMemo(() => projectIconSources(snapshot?.projects ?? []), [snapshot?.projects]);
+  return <ProjectIconSources.Provider value={icons}>
     <BoardView hostId={host.id} hostLabel={host.label} onOpenHostSession={navigation ? (serverId, agentId) => navigation.openAgent({ serverId, agentId }) : undefined} layout={layout} theme={theme} snapshot={snapshot} readiness={readiness} loading={loading} updatedAt={updatedAt} error={scopeError || error}
       changing={changing} coordinator={snapshot?.coordinator}
       onProject={(projectId, enabled) => void updateScope({kind: "project", projectId, enabled})}
@@ -93,7 +96,7 @@ function HostBoard({ host, theme, layout, navigation }: PluginScreenProps) {
     {session && <NoteEditor key={session.id} session={session} note={snapshot?.notes[session.id]} theme={theme}
       onClose={() => setEditing(null)} onSave={onSave}
       onSetReporting={async (enabled) => { const result = await changeReporting({ sessionId: session.id, enabled }); await refresh(); return result.ok; }} />}
-  </>;
+  </ProjectIconSources.Provider>;
 }
 
 function BoardScreen(props: PluginScreenProps) {

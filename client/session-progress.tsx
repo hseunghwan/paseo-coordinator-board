@@ -3,7 +3,7 @@ import { useSettings } from "@getpaseo/plugin/client";
 import { useState, type ReactNode } from "react";
 import { Text, View } from "react-native";
 import { z } from "zod";
-import { Button, SessionChip, type Theme } from "./controls";
+import { Button, ProjectText, RunningMark, SessionChip, type Theme } from "./controls";
 import { useBoardLanguage } from "./language";
 import type { Card } from "./model";
 import type { RemoteGroup } from "./remote-running";
@@ -70,9 +70,10 @@ export function SessionProgress({ cards, peers, peersLoading, hostLabel, project
           const target = row.host;
           const visit = target === null ? open && (() => open(row.id)) : openRemote && (() => openRemote(target, row.id));
           return <View key={JSON.stringify([target, row.id])} style={{ flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 9, borderTopWidth: index ? 1 : 0, borderColor: c.border }}>
+            <RunningMark theme={theme} />
             <View style={{ flex: 1, gap: 3 }}>
               <Text selectable style={{ fontSize: 14, fontWeight: "600", color: c.foreground }}>{title}</Text>
-              <Text selectable style={{ fontSize: 12, color: c.foregroundMuted }}>{project} · {row.hostLabel}</Text>
+              <ProjectText theme={theme} projectId={row.projectId} projects={[project]} selectable style={{ fontSize: 12, color: c.foregroundMuted }}>{project} · {row.hostLabel}</ProjectText>
             </View>
             {visit && <SessionChip theme={theme} label={t("세션 열기", "Open session")}
               accessibilityLabel={t(`세션 열기 · ${title}`, `Open session · ${title}`) + " · " + project + " · " + row.hostLabel} onPress={visit} />}
