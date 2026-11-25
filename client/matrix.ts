@@ -165,6 +165,21 @@ export function isSelectedCell(current: CellRef | null, row: string, column: Mat
   return !!current && current.row === row && current.column === column;
 }
 
+// Cells whose cards stay mounted after their first opening, so a reply draft survives closing the cell.
+// A cell drops out once its row is gone or it has nothing left to show.
+export function liveCells(mounted: readonly CellRef[], rows: readonly Pick<MatrixRow, "key" | "cells">[]): CellRef[] {
+  return mounted.filter(ref => rows.some(row => row.key === ref.row && row.cells[ref.column].length > 0));
+}
+
+export function rememberCell(mounted: readonly CellRef[], next: CellRef, rows: readonly Pick<MatrixRow, "key" | "cells">[]): CellRef[] {
+  const live = liveCells(mounted, rows);
+  return live.some(ref => ref.row === next.row && ref.column === next.column) ? live : [...live, next];
+}
+
+export function mountedColumns(mounted: readonly CellRef[], row: string): MatrixColumn[] {
+  return matrixColumns.filter(column => mounted.some(ref => ref.row === row && ref.column === column));
+}
+
 export const narrowWidth = 600;
 
 // Until the first layout pass reports a width, trust the host's compact flag.

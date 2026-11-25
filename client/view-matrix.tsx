@@ -1,12 +1,12 @@
-import { useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { useMemo, useState, type ReactNode } from "react";
+import { Pressable, ScrollView, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import type { BoardLayoutProps, DecisionEntry, ProjectBundle } from "./board-layout";
 import { Button, RunningMark, SectionLabel, SessionChip, StatusBadge, StatusDot, fontSize, space, type Theme } from "./controls";
 import { decisionGroupLabel } from "./decision-row";
 import { useBoardLanguage } from "./language";
 import {
-  cellPreview, entryDisplay, hostSummary, isNarrow, isSelectedCell, matrixColumnLabel, matrixColumns, matrixMark, matrixPermission,
-  matrixRows, matrixSummary, matrixTitle, orphanRemote, ribbonEntries, toggleCell,
+  cellPreview, entryDisplay, hostSummary, isNarrow, isSelectedCell, liveCells, matrixColumnLabel, matrixColumns, matrixMark, matrixPermission,
+  matrixRows, matrixSummary, matrixTitle, mountedColumns, orphanRemote, rememberCell, ribbonEntries, toggleCell,
   type CellRef, type LaneItem, type MatrixColumn, type MatrixMark, type MatrixRow,
 } from "./matrix";
 import { CardView } from "./project-kanban";
@@ -19,9 +19,15 @@ export function MatrixView(props: BoardLayoutProps) {
   const [operations, setOperations] = useState({ open: false, mounted: false });
   const [progress, setProgress] = useState({ open: false, mounted: false });
   const [cell, setCell] = useState<CellRef | null>(null);
+  const [opened, setOpened] = useState<CellRef[]>([]);
   const narrow = isNarrow(compact, width);
   const rows = useMemo(() => matrixRows(projects, t("공통", "Host-wide")), [projects, t]);
   const orphans = useMemo(() => orphanRemote(projects.peers, rows.map(row => row.id)), [projects.peers, rows]);
+  const mounted = liveCells(opened, rows);
+  const onCell = (next: CellRef) => {
+    setCell(current => toggleCell(current, next));
+    setOpened(current => rememberCell(current, next, rows));
+  };
   const c = theme.colors;
   return <ScrollView style={{ flex: 1, backgroundColor: c.surface0 }} onLayout={event => setWidth(event.nativeEvent.layout.width)}
     contentContainerStyle={{ gap: space[4], padding: narrow ? space[3] : space[6] }}>
@@ -33,11 +39,11 @@ export function MatrixView(props: BoardLayoutProps) {
         onPress={() => setOperations(state => ({ open: !state.open, mounted: true }))} />
     </View>
     {/* Stays mounted once opened so a half-written request survives closing the panel. */}
-    {operations.mounted && <View style={{ display: operations.open ? "flex" : "none" }}>{slots.operations}</View>}
+    {operations.mounted && <Hideable hidden={!operations.open}>{slots.operations}</Hideable>}
     <DecisionRibbon theme={theme} entries={entries} renderReceipt={renderReceipt} name={projects.name} />
     {narrow
-      ? <NarrowMatrix theme={theme} rows={rows} projects={projects} cell={cell} onCell={next => setCell(current => toggleCell(current, next))} />
-      : <WideMatrix theme={theme} rows={rows} projects={projects} cell={cell} wide={width >= 900} onCell={next => setCell(current => toggleCell(current, next))} />}
+      ? <NarrowMatrix theme={theme} rows={rows} projects={projects} cell={cell} mounted={mounted} onCell={onCell} />
+      : <WideMatrix theme={theme} rows={rows} projects={projects} cell={cell} mounted={mounted} wide={width >= 900} onCell={onCell} />}
     <OrphanRemote theme={theme} groups={orphans} projects={projects} />
     {slots.history}
     <View style={{ gap: space[3] }}>
@@ -46,9 +52,15 @@ export function MatrixView(props: BoardLayoutProps) {
           label={progress.open ? t("세션 진행 접기", "Hide session progress") : t("세션 진행 전체 보기", "Show all session progress")}
           onPress={() => setProgress(state => ({ open: !state.open, mounted: true }))} />
       </View>
-      {progress.mounted && <View style={{ display: progress.open ? "flex" : "none" }}>{slots.progress}</View>}
+      {progress.mounted && <Hideable hidden={!progress.open}>{slots.progress}</Hideable>}
     </View>
   </ScrollView>;
+}
+
+// Keeps children mounted (a draft inside survives) while taking them off screen and out of screen readers.
+function Hideable({ hidden, style, children }: { hidden: boolean; style?: StyleProp<ViewStyle>; children: ReactNode }) {
+  return <View accessibilityElementsHidden={hidden} importantForAccessibility={hidden ? "no-hide-descendants" : "auto"}
+    style={[style, hidden && { display: "none" }]}>{children}</View>;
 }
 
 function DecisionRibbon({ theme, entries, renderReceipt, name }: {
@@ -83,13 +95,13 @@ function DecisionRibbon({ theme, entries, renderReceipt, name }: {
     {/* Every card stays mounted, shown or not, so a reply draft outlives a change of selection. */}
     {entries.map(entry => {
       const shown = entryDisplay(entry, selected);
-      return <View key={entry.key} style={{ gap: space[2], display: shown.card || shown.receipts ? "flex" : "none" }}>
+      return <Hideable key={entry.key} hidden={!shown.card && !shown.receipts} style={{ gap: space[2] }}>
         {shown.receipts && entry.receipts.map(renderReceipt)}
         {shown.card && entry.summary?.permission && <Text style={{ color: c.foregroundMuted, fontSize: fontSize.sm }}>
           {t("권한 요청은 세션에서 승인합니다. 보드는 이 세션에 메시지를 보내지 않습니다.", "Approve permission requests in the session. The board does not message this session.")}
         </Text>}
-        <View style={{ display: shown.card ? "flex" : "none" }}>{entry.card}</View>
-      </View>;
+        <Hideable hidden={!shown.card}>{entry.card}</Hideable>
+      </Hideable>;
     })}
   </View>;
 }
@@ -162,8 +174,8 @@ function HeaderMark({ column, theme }: { column: MatrixColumn; theme: Theme }) {
   return <StatusDot theme={theme} tone={column === "human" ? "warning" : column === "done" ? "success" : "muted"} />;
 }
 
-function WideMatrix({ rows, theme, projects, cell, onCell, wide }: {
-  rows: readonly MatrixRow[]; theme: Theme; projects: ProjectBundle; cell: CellRef | null; onCell: (next: CellRef) => void; wide: boolean;
+function WideMatrix({ rows, theme, projects, cell, mounted, onCell, wide }: {
+  rows: readonly MatrixRow[]; theme: Theme; projects: ProjectBundle; cell: CellRef | null; mounted: readonly CellRef[]; onCell: (next: CellRef) => void; wide: boolean;
 }) {
   const { t } = useBoardLanguage();
   const c = theme.colors;
@@ -190,13 +202,16 @@ function WideMatrix({ rows, theme, projects, cell, onCell, wide }: {
           <Text style={{ color: c.foregroundMuted, fontSize: fontSize.sm }}>{hostSummary(row.hosts)}</Text>
         </View>
       </View>
-      {cell?.row === row.key && <CellDrawer row={row} column={cell.column} theme={theme} projects={projects} wide={wide} />}
+      {/* A cell opened once keeps its cards mounted, hidden while closed, so a reply draft survives. */}
+      {mountedColumns(mounted, row.key).map(column => <Hideable key={column} hidden={!isSelectedCell(cell, row.key, column)}>
+        <CellDrawer row={row} column={column} theme={theme} projects={projects} wide={wide} />
+      </Hideable>)}
     </View>)}
   </View>;
 }
 
-function NarrowMatrix({ rows, theme, projects, cell, onCell }: {
-  rows: readonly MatrixRow[]; theme: Theme; projects: ProjectBundle; cell: CellRef | null; onCell: (next: CellRef) => void;
+function NarrowMatrix({ rows, theme, projects, cell, mounted, onCell }: {
+  rows: readonly MatrixRow[]; theme: Theme; projects: ProjectBundle; cell: CellRef | null; mounted: readonly CellRef[]; onCell: (next: CellRef) => void;
 }) {
   const { t } = useBoardLanguage();
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
@@ -212,6 +227,7 @@ function NarrowMatrix({ rows, theme, projects, cell, onCell }: {
       const expanded = open.has(row.key);
       const summary = matrixSummary(row.cells, t);
       const filled = matrixColumns.filter(column => row.cells[column].length);
+      const kept = mountedColumns(mounted, row.key);
       return <View key={row.key} style={index ? { borderTopWidth: 1, borderColor: c.border } : undefined}>
         <Pressable accessibilityRole="button" accessibilityState={{ expanded }} aria-expanded={expanded}
           accessibilityLabel={`${row.title} · ${summary}`} onPress={() => toggle(row.key)}
@@ -222,17 +238,17 @@ function NarrowMatrix({ rows, theme, projects, cell, onCell }: {
           </View>
           <Text accessible={false} style={{ color: c.foregroundMuted }}>{expanded ? "▴" : "▾"}</Text>
         </Pressable>
-        {expanded && <View style={{ gap: space[3], paddingHorizontal: space[3], paddingBottom: space[3] }}>
+        {(expanded || kept.length > 0) && <Hideable hidden={!expanded} style={{ gap: space[3], paddingHorizontal: space[3], paddingBottom: space[3] }}>
           {row.hosts.length > 0 && <Text style={{ color: c.foregroundMuted, fontSize: fontSize.sm }}>{t("호스트", "Host")} · {hostSummary(row.hosts)}</Text>}
           {!filled.length && <Text style={{ color: c.foregroundMuted, fontSize: fontSize.sm }}>{t("없음", "None")}</Text>}
           {filled.map(column => <View key={column} style={{ gap: space[1] }}>
             <SectionLabel theme={theme} count={row.cells[column].length}>{matrixColumnLabel(column, t)}</SectionLabel>
             <CellButton row={row} column={column} theme={theme} cell={cell} onCell={onCell} limit={Infinity} style={{ borderRadius: 12 }} />
-            {isSelectedCell(cell, row.key, column) && <View style={{ gap: space[3] }}>
+            {kept.includes(column) && <Hideable hidden={!isSelectedCell(cell, row.key, column)} style={{ gap: space[3] }}>
               {row.cells[column].map(item => <ItemCard key={item.key} item={item} projectId={row.id} theme={theme} projects={projects} />)}
-            </View>}
+            </Hideable>}
           </View>)}
-        </View>}
+        </Hideable>}
       </View>;
     })}
   </View>;

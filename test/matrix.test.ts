@@ -3,9 +3,9 @@ import type { DecisionEntry } from "../client/board-layout";
 import type { InlineReceipt } from "../client/decision-receipts";
 import type { RankedDecision } from "../client/decision-priority";
 import {
-  cellPreview, classifyProject, entryDisplay, hostSummary, hostWideRowKey, isNarrow, isSelectedCell, matrixCells, matrixColumn,
+  cellPreview, classifyProject, entryDisplay, hostSummary, hostWideRowKey, isNarrow, isSelectedCell, liveCells, matrixCells, matrixColumn,
   matrixColumnLabel, matrixColumns, matrixMark, matrixPermission, matrixRows, matrixSummary, matrixTitle, orphanRemote,
-  projectHosts, ribbonEntries, toggleCell, type LaneItem,
+  mountedColumns, projectHosts, rememberCell, ribbonEntries, toggleCell, type CellRef, type LaneItem,
 } from "../client/matrix";
 import type { Card, Lane } from "../client/model";
 import type { RemoteGroup } from "../client/remote-running";
@@ -200,4 +200,32 @@ test("lists remote work only for projects missing from the table, and failed hos
   const peers = [group("laptop", [{ projectId: "a", sessionId: "1" }, { projectId: "z", sessionId: "2" }]), group("down", [], true), group("quiet", [{ projectId: "a", sessionId: "3" }])];
   const orphans = orphanRemote(peers, ["a", null]);
   expect(orphans.map(item => [item.host.label, item.failed, item.rows.map(row => row.sessionId)])).toEqual([["laptop", false, ["2"]], ["down", true, []]]);
+});
+
+test("keeps every opened cell mounted after closing it or opening another, until its items are gone", () => {
+  const busy = { key: "a", cells: matrixCells(classifyProject({ records: [record("ask")], cards: [card("run", "running"), card("ok", "done")], pulls: [] })) };
+  const other = { key: "b", cells: matrixCells(classifyProject({ records: [record("b-ask", { projectId: "b" })], cards: [], pulls: [] })) };
+  let rows = [busy, other];
+  let open: CellRef | null = null;
+  let mounted: CellRef[] = [];
+  const press = (next: CellRef) => { open = toggleCell(open, next); mounted = rememberCell(mounted, next, rows); };
+
+  press({ row: "a", column: "human" });
+  press({ row: "a", column: "human" });
+  expect(open).toBeNull();
+  expect(mounted).toEqual([{ row: "a", column: "human" }]);
+
+  press({ row: "a", column: "running" });
+  press({ row: "b", column: "human" });
+  press({ row: "a", column: "human" });
+  expect(open).toEqual({ row: "a", column: "human" });
+  expect(mounted).toEqual([{ row: "a", column: "human" }, { row: "a", column: "running" }, { row: "b", column: "human" }]);
+  expect(mountedColumns(mounted, "a")).toEqual(["human", "running"]);
+  expect(mountedColumns(mounted, "b")).toEqual(["human"]);
+
+  // The running session finished and project b left the board: those cells have nothing left to keep.
+  rows = [{ key: "a", cells: matrixCells(classifyProject({ records: [record("ask")], cards: [card("run", "done"), card("ok", "done")], pulls: [] })) }];
+  expect(liveCells(mounted, rows)).toEqual([{ row: "a", column: "human" }]);
+  press({ row: "a", column: "done" });
+  expect(mounted).toEqual([{ row: "a", column: "human" }, { row: "a", column: "done" }]);
 });
