@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 import type { BoardLayoutProps, DecisionEntry } from "./board-layout";
-import { Button, SectionLabel, SegmentedControl, StatusDot, fontSize, space, type Theme } from "./controls";
+import { Button, ProjectText, SectionLabel, SegmentedControl, StatusDot, fontSize, space, type Theme } from "./controls";
 import {
   activeDecisionCount, inboxKeyStep, inboxOrder, inboxRow, inboxRowAccessibilityLabel, inboxSectionLabel, inboxSections,
   isNarrowInbox, keepSelection, stepSelection, type InboxRow, type InboxTab, type KeyTarget,
@@ -11,7 +11,7 @@ import { useBoardLanguage } from "./language";
 const listWidth = 352;
 const keyboard = Platform.OS === "web" && typeof document !== "undefined";
 
-function InboxListRow({ row, selected, theme, onPress }: { row: InboxRow; selected: boolean; theme: Theme; onPress: () => void }) {
+function InboxListRow({ row, projectNames, selected, theme, onPress }: { row: InboxRow; projectNames: string[]; selected: boolean; theme: Theme; onPress: () => void }) {
   const c = theme.colors;
   return <Pressable accessibilityRole="button" accessibilityState={{ selected }} aria-selected={selected} accessibilityLabel={inboxRowAccessibilityLabel(row)} onPress={onPress}
     style={({ pressed }) => ({ flexDirection: "row", gap: space[2], paddingHorizontal: space[2], paddingVertical: space[2], borderRadius: 8,
@@ -22,7 +22,7 @@ function InboxListRow({ row, selected, theme, onPress }: { row: InboxRow; select
         <Text numberOfLines={1} style={{ flex: 1, color: c.foreground, fontSize: fontSize.base }}>{row.title}</Text>
         {row.aside && <Text numberOfLines={1} style={{ color: c.foregroundMuted, fontSize: fontSize.sm }}>{row.aside}</Text>}
       </View>
-      <Text numberOfLines={1} style={{ color: c.foregroundMuted, fontSize: fontSize.sm }}>{row.meta}</Text>
+      <ProjectText theme={theme} projects={projectNames} numberOfLines={1} style={{ color: c.foregroundMuted, fontSize: fontSize.sm }}>{row.meta}</ProjectText>
     </View>
   </Pressable>;
 }
@@ -112,7 +112,7 @@ export function InboxView({ theme, compact, entries, renderReceipt, slots, proje
               <SectionLabel theme={theme} count={section.entries.length}>{inboxSectionLabel(section.id, t)}</SectionLabel>
             </View>
             {section.entries.map(entry => <InboxListRow key={entry.key} theme={theme} selected={entry.key === selected}
-              row={inboxRow(entry, projects.name, t, now)} onPress={() => { setChosen(entry.key); setDetailOpen(true); }} />)}
+              projectNames={(entry.summary?.projectIds ?? entry.receipts.at(-1)?.projectIds ?? []).filter(id => id !== null).map(projects.name)} row={inboxRow(entry, projects.name, t, now)} onPress={() => { setChosen(entry.key); setDetailOpen(true); }} />)}
           </View>)}
           {keyboard && !narrow && <Text style={{ ...muted, paddingHorizontal: space[2], paddingVertical: space[2] }}>{t("J · K 키로 이전·다음 결정", "J · K for next and previous")}</Text>}
         </ScrollView>

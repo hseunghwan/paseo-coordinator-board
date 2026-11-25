@@ -25,6 +25,8 @@ Open the board from the sidebar and select the projects you want in your digest.
 
 **Board view.** Choose a layout with **Inbox · Focus · Matrix · Classic** in the header or in **Settings → Board view**. Your device remembers the choice.
 
+Project names have colored icons with their first letter. Running sessions have a spinning indicator. Under **Settings → Choose projects to manage**, a check mark shows which projects are managed. Select a project button to change its selection.
+
 - **Inbox** (default): pick a decision from the list and read or answer it in the detail pane. The list groups decisions into Act now, Waiting on you, Ready to merge and Later. Tabs above it open **Progress** and **History**. On a narrow screen, selecting a row opens its detail.
 - **Focus**: shows the most urgent decision on its own. Finishing it moves to the next one, and **Later** sends it to the end of the queue. On desktop and web, press J (next), K (previous) or S (later). The strip at the bottom counts running sessions per project.
 - **Matrix**: ranks decisions in a strip and shows each project's decisions, running work, items awaiting review, idle sessions and finished work in one table row. A session with an unseen result moves to Idle after you open it. Select a cell to open its cards below that row.

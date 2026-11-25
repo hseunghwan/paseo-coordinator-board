@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { boardHosts, hostVisibility, type BoardHost } from "../shared/hosts";
 import { readRemoteSessions, remoteScope, type LocalProject, type RemoteSession, type Repository } from "./remote-sessions";
-import { SessionChip, type Theme } from "./controls";
+import { ProjectText, RunningMark, SessionChip, type Theme } from "./controls";
 import { useBoardLanguage } from "./language";
 
 type Open = (serverId: string, sessionId: string) => void;
@@ -60,7 +60,10 @@ function HostRunning({ host, rows, failed, projects, theme, open }: RemoteGroup 
       if (!project?.selected) return null;
       const title = row.title || t(`세션 ${row.sessionId.slice(0,8)}`,`Session ${row.sessionId.slice(0,8)}`);
       return <View key={row.sessionId} style={{flexDirection:"row",flexWrap:"wrap",alignItems:"center",gap:6}}>
-        <Text selectable style={{flexGrow:1,flexShrink:1,color:c.foreground}}>{project.title} · {title}</Text>
+        <RunningMark theme={theme} />
+        <View style={{flex:1}}>
+          <ProjectText theme={theme} projects={[project.title]} selectable style={{color:c.foreground}}>{project.title} · {title}</ProjectText>
+        </View>
         {open && <SessionChip theme={theme} label={t("담당 세션","Task session")}
           accessibilityLabel={t(`${host.label} · ${title} 열기`,`Open ${title} on ${host.label}`)} onPress={() => open(host.serverId,row.sessionId)} />}
       </View>;

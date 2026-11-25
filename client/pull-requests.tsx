@@ -3,7 +3,7 @@ import { openExternalUrl, useRpc } from "@getpaseo/plugin/client";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Platform, Text, TextInput, View } from "react-native";
 import { confirmPullRequestMerge, previewPullRequestMerge, pullUrl, readPullLifecycle, setProjectRepository, type MergeMethod, type MergePreview, type MergeReason, type MergeResult, type PullRequestView } from "../shared/prs";
-import { Button, SessionChip, type Theme } from "./controls";
+import { Button, ProjectText, SettingsDisclosure, SessionChip, type Theme } from "./controls";
 import { mergeNotificationLabel } from "./merge-notification";
 import { useBoardLanguage, type Translate } from "./language";
 
@@ -188,10 +188,9 @@ export function PullRequestCard({ pr, projectId, theme, decision = false, showDi
 export function PullRequestSettings({view, names, theme, refresh}: {view: PullRequestView; names: Map<string,string>; theme: Theme; refresh: () => void}) {
   const {t} = useBoardLanguage();
   const [expanded, setExpanded] = useState(false);
-  return <View style={{gap:8}}>
-    <Button theme={theme} label={expanded ? t("GitHub 저장소 설정 닫기", "Close GitHub repositories") : t("프로젝트별 GitHub 저장소", "GitHub repositories by project")} onPress={() => setExpanded(!expanded)} />
-    {expanded && view.projects.map(project => <RepositorySetting key={JSON.stringify([project.projectId, project.mode, project.repo])} project={project} title={names.get(project.projectId) ?? project.projectId} theme={theme} refresh={refresh}/>)}
-  </View>;
+  return <SettingsDisclosure theme={theme} title={t("프로젝트별 GitHub 저장소", "GitHub repositories by project")} expanded={expanded} onPress={() => setExpanded(!expanded)}>
+    {view.projects.map(project => <RepositorySetting key={JSON.stringify([project.projectId, project.mode, project.repo])} project={project} title={names.get(project.projectId) ?? project.projectId} theme={theme} refresh={refresh}/>)}
+  </SettingsDisclosure>;
 }
 
 function RepositorySetting({project, title, theme, refresh}: {project: PullRequestView["projects"][number]; title:string; theme:Theme; refresh:()=>void}) {
@@ -211,7 +210,7 @@ function RepositorySetting({project, title, theme, refresh}: {project: PullReque
   }
   const states = {ok:t("조회됨","Connected"), unmapped:t("저장소 연결 필요","Link a repository"), unavailable:t("조회 실패 · 호스트의 gh 연결 확인","Lookup failed · Check gh on the host"), off:t("꺼짐","Off"), truncated:t("일부 PR만 표시","Showing a partial PR list")};
   return <View style={{gap:6,padding:10,backgroundColor:c.surface1,borderRadius:8}}>
-    <Text selectable style={{color:c.foreground,fontWeight:"600"}}>{title}</Text>
+    <ProjectText theme={theme} projects={[title]} selectable style={{color:c.foreground,fontWeight:"600"}}>{title}</ProjectText>
     <Text selectable style={{color:c.foregroundMuted}}>{project.repo ? project.repo + " · " : ""}{states[project.status]}</Text>
     <TextInput accessibilityLabel={t(title+" GitHub 저장소",title+" GitHub repository")} placeholder="owner/repository" autoCapitalize="none" autoCorrect={false}
       value={repo} onChangeText={setText} placeholderTextColor={c.foregroundMuted} style={{color:c.foreground,borderColor:c.border,borderWidth:1,borderRadius:6,padding:7}}/>

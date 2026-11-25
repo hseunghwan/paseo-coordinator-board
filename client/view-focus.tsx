@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Platform, ScrollView, Text, View } from "react-native";
 import type { BoardLayoutProps, DecisionEntry } from "./board-layout";
-import { Button, RunningMark, SectionLabel, space, fontSize, StatusBadge, StatusDot, type Theme } from "./controls";
+import { Button, ProjectText, RunningMark, SectionLabel, space, fontSize, StatusBadge, StatusDot, type Theme } from "./controls";
 import { decisionGroupLabel } from "./decision-row";
 import {
   deferFocus, focusKeyAction, focusNeedsEmptyNotice, focusProgress, focusRail, isProcessed, railCell, resolveFocus, stepFocus,
@@ -100,7 +100,7 @@ export function FocusView(props: BoardLayoutProps) {
         <View style={currentEntry ? { gap: space[4], padding: narrow ? space[3] : space[6], backgroundColor: c.surface1, borderWidth: 1, borderColor: c.border, borderRadius: 16 } : undefined}>
           {currentEntry?.summary && <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: space[2] }}>
             <StatusBadge theme={theme} tone={currentEntry.summary.tone} label={currentEntry.label ?? decisionGroupLabel(currentEntry.summary.group, t)} />
-            {!!projectLine(currentEntry) && <Text numberOfLines={1} style={{ flexShrink: 1, color: c.foregroundMuted, fontSize: fontSize.sm }}>{projectLine(currentEntry)}</Text>}
+            {!!projectLine(currentEntry) && <ProjectText theme={theme} projects={currentEntry.summary?.projectIds.filter(id => id !== null).map(projects.name) ?? []} numberOfLines={1} style={{ color: c.foregroundMuted, fontSize: fontSize.sm }}>{projectLine(currentEntry)}</ProjectText>}
             {currentEntry.summary.permission && <Text style={{ color: c.statusWarning, fontSize: fontSize.sm }}>{approve}</Text>}
           </View>}
           {currentEntry?.receipts.map(renderReceipt)}
@@ -164,7 +164,7 @@ function ActivityStrip({ props, pad, open, onToggle, t }: { props: BoardLayoutPr
         return <View key={project.id} accessible accessibilityLabel={[project.name, t(`진행 중 ${project.running}`, `${project.running} running`),
           project.attention ? t("확인 대기 또는 오류", "Needs review or failed") : ""].filter(Boolean).join(" · ")}
           style={{ flexDirection: "row", alignItems: "center", gap: space[1] }}>
-          <Text numberOfLines={1} style={{ color: c.foreground, fontSize: fontSize.sm, maxWidth: 160 }}>{project.name}</Text>
+          <ProjectText theme={theme} projects={[project.name]} numberOfLines={1} style={{ color: c.foreground, fontSize: fontSize.sm, maxWidth: 160 }}>{project.name}</ProjectText>
           {Array.from({ length: marks }, (_, i) => <RunningMark key={i} theme={theme} />)}
           {extra > 0 && <Text style={{ color: c.foregroundMuted, fontSize: fontSize.sm }}>+{extra}</Text>}
           {project.attention && <StatusDot theme={theme} tone="danger" />}

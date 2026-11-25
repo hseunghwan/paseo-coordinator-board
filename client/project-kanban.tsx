@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { View, Pressable, Text, ScrollView } from "react-native";
-import { Button, SessionChip, type Theme } from "./controls";
+import { Button, ProjectText, RunningMark, SessionChip, type Theme } from "./controls";
 import { useBoardLanguage } from "./language";
 import { columnWidth, COLUMN_GAP } from "./lane-width";
 import type { PullRequestItem } from "../shared/prs";
@@ -42,6 +42,7 @@ export function CardView({ card, theme, onOpen, onEdit, sessionHostLabel }: { ca
         accessibilityLabel={t(`${session.title} · ${expanded ? "상세 접기" : "상세 보기"}`, `${session.title} · ${expanded ? "Hide details" : "View details"}`)}
         onPress={() => setExpanded(value => !value)} style={{ gap: 3 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+          {card.lane === "running" && <RunningMark theme={theme} />}
           <Text style={{ color: c.foreground, fontSize: 14, fontWeight: "600", flex: 1 }}>{session.title}</Text>
           <Text accessible={false} style={{ color: c.foregroundMuted }}>{expanded ? "▴" : "▾"}</Text>
         </View>
@@ -129,7 +130,7 @@ export function Project({projectId,title,decisions,cards,records,history=[],hist
     <Column lane={lane} entries={groups[lane]} theme={theme} />
   </View>);
   return <View style={{gap:8}} onLayout={e=>setWidth(e.nativeEvent.layout.width)}>
-    <Text accessibilityRole="header" style={{fontSize:18,fontWeight:"600",color:theme.colors.foreground}}>{title}</Text>
+    <ProjectText theme={theme} projects={projectId ? [title] : []} accessibilityRole="header" style={{fontSize:18,fontWeight:"600",color:theme.colors.foreground}}>{title}</ProjectText>
     <Text style={{fontSize:13,color:theme.colors.foregroundMuted}}>
       {t(`세션 ${cards.length}개 · 진행 중인 세션 ${running}개 · 내 결정 ${decisions}건`,`Sessions ${cards.length} · Running sessions ${running} · My decisions ${decisions}`)}
     </Text>

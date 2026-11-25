@@ -25,7 +25,7 @@ import { SessionLinks } from "./session-links";
 import { useRemoteRunning, RemoteRunning } from "./remote-running";
 import { BoardHosts } from "./hosts";
 import { OperationsPanel } from "./operations";
-import { Button, fontSize, space, type Theme } from "./controls";
+import { Button, SettingsDisclosure, fontSize, space, type Theme } from "./controls";
 import { Project } from "./project-kanban";
 import { SessionProgress } from "./session-progress";
 import { BoardLanguageSetting, useBoardLanguage } from "./language";
@@ -295,7 +295,7 @@ export function BoardView({ snapshot, readiness, theme, layout, hostLabel, hostI
     style={{flexDirection:"row", flexWrap:"wrap", alignItems:"center", gap:space[2]}}>
     <Button theme={theme} size="sm" label={t(`전체 ${total}`,`All ${total}`)} selected={!filters.length} onPress={() => setChosenProjects([])} />
     {[...byProject].map(([id,count]) => <Button key={JSON.stringify(id)} theme={theme} size="sm" toggle selected={filters.includes(id)}
-      label={`${projectName(id)} · ${count}`} onPress={() => toggleFilter(id)} />)}
+      project={id === null ? undefined : projectName(id)} label={`${projectName(id)} · ${count}`} onPress={() => toggleFilter(id)} />)}
   </View> : null;
   const noticesNode = snapshot ? <>
     {incomplete &&
@@ -351,6 +351,19 @@ export function BoardView({ snapshot, readiness, theme, layout, hostLabel, hostI
     </View>;
   }
 
+  const projectPicker = snapshot && onProject && (pickingProjects || settings) ? <>
+    <Text style={{ color: c.foregroundMuted }}>{t("선택한 프로젝트의 최근 대화를 읽어 내 결정을 찾습니다. 코디네이터를 지정하면 그 세션도 선택한 프로젝트의 발췌를 볼 수 있습니다.", "The board reads recent conversations in selected projects to find decisions. The assigned coordinator can also read excerpts from those projects.")}</Text>
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: space[2] }}>
+      {snapshot.projects.map(project => {
+        const duplicateName = snapshot.projects.some(other => other.id !== project.id && other.title === project.title);
+        const label = duplicateName ? `${project.title} · ${project.path || project.id}` : project.title;
+        return <Button key={project.id} theme={theme} size="sm" toggle project={project.title} selected={project.selected} disabled={actions.changing}
+          label={project.selected ? `✓ ${label}` : label} accessibilityLabel={label}
+          onPress={() => onProject(project.id, !project.selected)} />;
+      })}
+    </View>
+  </> : null;
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: c.surface0 }} contentContainerStyle={{ gap: space[6], padding: pad }}>
       {header}
@@ -359,17 +372,14 @@ export function BoardView({ snapshot, readiness, theme, layout, hostLabel, hostI
       {settings && <BoardViewSetting view={view} theme={theme} />}
       {settings && <BoardLanguageSetting theme={theme} />}
       {!!error && settings && <Button theme={theme} label={t("세션 다시 조회", "Retry session lookup")} disabled={loading} onPress={onRefresh} />}
-      {snapshot && onProject && (pickingProjects || settings) && <View style={{ gap: space[2] }}>
-        {!pickingProjects
-          ? <Button theme={theme} label={manage ? t("프로젝트 관리 닫기", "Close project selection") : t("보드에서 관리할 프로젝트 선택", "Choose projects to manage")} onPress={() => setManage(!manage)} />
-          : <Text accessibilityRole="header" style={{ color: c.foreground, fontSize: fontSize.base, fontWeight: "500" }}>{t("다이제스트에서 관리할 프로젝트 선택", "Select projects for your digest")}</Text>}
-        {(pickingProjects || manage) && <>
-          <Text style={{ color: c.foregroundMuted }}>{t("선택한 프로젝트의 최근 대화를 읽어 내 결정을 찾습니다. 코디네이터를 지정하면 그 세션도 선택한 프로젝트의 발췌를 볼 수 있습니다.", "The board reads recent conversations in selected projects to find decisions. The assigned coordinator can also read excerpts from those projects.")}</Text>
-          {snapshot.projects.map(p => <Button key={p.id} theme={theme} selected={p.selected} disabled={actions.changing}
-            label={`${p.selected ? t("관리에서 제외", "Remove") : t("추가", "Add")} · ${p.title}${snapshot.projects.some(x => x.id !== p.id && x.title === p.title) ? " · " + (p.path || p.id) : ""}`}
-            onPress={() => onProject(p.id, !p.selected)} />)}
-        </>}
-      </View>}
+      {projectPicker && (pickingProjects
+        ? <View style={{ gap: space[2] }}>
+          <Text accessibilityRole="header" style={{ color: c.foreground, fontSize: fontSize.base, fontWeight: "500" }}>{t("다이제스트에서 관리할 프로젝트 선택", "Select projects for your digest")}</Text>
+          {projectPicker}
+        </View>
+        : <SettingsDisclosure theme={theme} title={t("보드에서 관리할 프로젝트 선택", "Choose projects to manage")} expanded={manage} onPress={() => setManage(!manage)}>
+          {projectPicker}
+        </SettingsDisclosure>)}
       {settings && snapshot && configured && <SessionLinks projects={snapshot.projects} theme={theme} onChange={onRefresh} />}
       {settings && pullRequests && !!configured && <PullRequestSettings view={pullRequests} names={names} theme={theme} refresh={onRefresh} />}
       {settings && hostId && <>
@@ -382,7 +392,7 @@ export function BoardView({ snapshot, readiness, theme, layout, hostLabel, hostI
         {pickSession && <>
           {snapshot.coordinator && <Button theme={theme} disabled={actions.changing} label={t("현재 코디네이터 지정 해제", "Clear current coordinator")} onPress={() => actions.onCoordinator?.(null)} />}
           {snapshot.sessions.filter(s => s.id !== snapshot.coordinator).map(s => <Button key={s.id} theme={theme} disabled={actions.changing}
-            label={`${s.projectTitle} · ${s.title} · ${t("지정", "Assign")}`} onPress={() => actions.onCoordinator?.(s.id)} />)}
+            project={s.projectTitle} label={`${s.projectTitle} · ${s.title} · ${t("지정", "Assign")}`} onPress={() => actions.onCoordinator?.(s.id)} />)}
           {!snapshot.sessions.length && <Text style={{ color: c.foregroundMuted }}>{t("관리할 프로젝트를 선택하면 지정할 수 있는 세션이 표시됩니다.", "Select a project to see its available sessions.")}</Text>}
         </>}
       </View>}
